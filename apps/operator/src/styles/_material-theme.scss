@@ -1,0 +1,91 @@
+@use '@angular/material' as mat;
+
+@mixin material-tokens {
+  --mat-sys-primary: var(--it-color-primary);
+  --mat-sys-on-primary: var(--it-palette-white);
+  --mat-sys-primary-container: #e6f4ff;
+  --mat-sys-on-primary-container: var(--it-palette-blue-600);
+
+  --mat-sys-error: var(--it-color-error);
+  --mat-sys-on-error: var(--it-palette-white);
+
+  --mat-sys-surface: var(--it-color-surface);
+  --mat-sys-on-surface: var(--it-color-text);
+  --mat-sys-surface-container: var(--it-color-bg);
+  --mat-sys-on-surface-variant: var(--it-color-text-muted);
+
+  --mat-sys-outline: var(--it-color-border);
+  --mat-sys-outline-variant: var(--it-color-border);
+}
+
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        brand-family: 'Inter',
+        plain-family: 'Inter',
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+
+  @include material-tokens;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  @include material-tokens;
+
+  --mat-sys-primary-container: #111d2c;
+  --mat-sys-on-primary-container: #69c0ff;
+  --mat-sys-surface-container-low: var(--it-color-bg);
+  --mat-sys-surface-container-high: var(--it-color-surface);
+  --mat-sys-surface-container-highest: var(--it-color-surface);
+  --mat-sys-surface-bright: var(--it-color-surface);
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field-infix {
+  min-height: 40px;
+}
+
+.mat-mdc-text-field-wrapper {
+  height: 40px;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button,
+.mat-mdc-button,
+.mat-mdc-icon-button {
+  text-transform: none;
+}
+
+.snackbar--error {
+  --mat-snack-bar-container-color: var(--it-color-error);
+  --mat-snack-bar-supporting-text-color: var(--it-palette-white);
+}
+
+.snackbar--success {
+  --mat-snack-bar-container-color: var(--it-color-success);
+  --mat-snack-bar-supporting-text-color: var(--it-palette-white);
+}

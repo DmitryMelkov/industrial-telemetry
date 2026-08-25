@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+dist-ssr/
+.angular/
+coverage/
+tmp/
+out-tsc/
+*.tsbuildinfo
+
+# Logs / dumps
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.stackdump
+bash.exe.stackdump
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Misc
+__screenshots__/
+.sass-cache/
+data/
+/generated/prisma

@@ -1,0 +1,13 @@
+<button
+  mat-icon-button
+  type="button"
+  class="theme-toggle"
+  [class.theme-toggle--toolbar]="variant() === 'toolbar'"
+  [class.theme-toggle--animating]="isAnimating()"
+  [attr.aria-label]="
+    themeService.theme() === 'light' ? 'Включить темную тему' : 'Включить светлую тему'
+  "
+  (click)="toggle()"
+>
+  <mat-icon>{{ themeService.theme() === 'light' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+</button>

@@ -1,0 +1,136 @@
+.charts {
+  display: grid;
+  gap: var(--it-space-4);
+}
+
+.charts .surface-card {
+  border-radius: 2px;
+}
+
+.charts__hero,
+.charts__workspace,
+.charts__state {
+  display: grid;
+  gap: var(--it-space-3);
+}
+
+.charts__eyebrow {
+  letter-spacing: 0.04em;
+  margin-bottom: var(--it-space-2);
+  text-transform: uppercase;
+}
+
+.charts__title {
+  margin: 0;
+}
+
+.charts__state {
+  align-items: center;
+  justify-items: start;
+  min-height: 240px;
+}
+
+.charts__panel-header,
+.charts__header-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--it-space-2);
+}
+
+.charts__panel-header {
+  justify-content: space-between;
+}
+
+.charts__expand {
+  color: var(--it-color-text);
+}
+
+.charts__range {
+  --mat-standard-button-toggle-selected-state-background-color: var(--it-color-primary);
+  --mat-standard-button-toggle-selected-state-text-color: var(--it-palette-white);
+  --mat-standard-button-toggle-height: 36px;
+
+  border: 1px solid var(--it-color-border);
+  border-radius: var(--it-radius-sm, 4px);
+}
+
+.charts__custom-range {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mdc-icon-button-state-layer-size: 32px;
+  --mat-icon-button-state-layer-size: 32px;
+
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--it-space-3);
+}
+
+.charts__datetime {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--it-space-2);
+}
+
+.charts__datetime-label {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.charts__custom-range mat-form-field {
+  min-width: 168px;
+  width: auto;
+}
+
+.charts__custom-range :is(mat-datepicker-toggle, mat-timepicker-toggle) {
+  height: 32px;
+  width: 32px;
+}
+
+.charts__custom-range ::ng-deep .mat-mdc-icon-button {
+  height: 32px;
+  padding: 0;
+  width: 32px;
+}
+
+.charts__layout {
+  align-items: stretch;
+  display: flex;
+  gap: var(--it-space-4);
+  min-height: 0;
+}
+
+.charts__chart {
+  display: grid;
+  flex: 1;
+  grid-template-rows: 1fr auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.charts__meta {
+  margin: var(--it-space-2) 0 0;
+}
+
+app-charts-sensor-panel {
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (width <= 900px) {
+  .charts__layout {
+    flex-direction: column;
+  }
+
+  .charts__panel-header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .charts__custom-range mat-form-field {
+    min-width: 0;
+    width: 100%;
+  }
+}

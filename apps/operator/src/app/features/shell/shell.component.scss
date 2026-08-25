@@ -1,0 +1,72 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.shell {
+  background: var(--it-color-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.shell__header {
+  align-items: center;
+  background: var(--it-shell-bg);
+  border-bottom: 1px solid var(--it-shell-border);
+  color: var(--it-shell-text);
+  display: flex;
+  gap: var(--it-space-4);
+  height: var(--it-shell-height);
+  padding: 0 var(--it-page-padding-x);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.shell__title {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.shell__nav {
+  align-items: center;
+  display: flex;
+  gap: var(--it-space-2);
+  min-width: 0;
+}
+
+.shell__link {
+  border-radius: var(--it-radius-sm);
+  color: var(--it-shell-text-muted);
+  padding: var(--it-space-2) var(--it-space-3);
+}
+
+.shell__link--active {
+  color: var(--it-color-primary);
+  font-weight: var(--it-font-weight-medium);
+}
+
+.shell__actions {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: var(--it-space-1);
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.shell__email {
+  color: var(--it-shell-text-muted);
+  margin-right: var(--it-space-2);
+}
+
+.shell__main {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .shell__email {
+    display: none;
+  }
+}

@@ -1,0 +1,35 @@
+<div class="shell">
+  <header class="shell__header">
+    <h1 class="typo typo--h6 shell__title">Operator Console</h1>
+    <nav class="shell__nav">
+      <a
+        class="typo typo--caption shell__link"
+        routerLink="/overview"
+        routerLinkActive="shell__link--active"
+        >Overview</a
+      >
+      <a
+        class="typo typo--caption shell__link"
+        routerLink="/charts"
+        routerLinkActive="shell__link--active"
+        >График</a
+      >
+      <a
+        class="typo typo--caption shell__link"
+        routerLink="/alerts"
+        routerLinkActive="shell__link--active"
+        >Журнал</a
+      >
+    </nav>
+    <div class="shell__actions">
+      @if (authService.currentUser$ | async; as user) {
+        <span class="typo typo--caption shell__email">{{ user.email }}</span>
+      }
+      <app-theme-toggle variant="header" />
+      <button mat-button type="button" class="btn btn--text" disableRipple (click)="logout()">
+        Выйти
+      </button>
+    </div>
+  </header>
+  <main class="shell__main"><router-outlet /></main>
+</div>

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+dist/
+
+# Env
+.env
+.env.local
+
+# Logs / OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.tsbuildinfo
+
+# Coverage / test
+coverage/
+
+# Docker volumes leftovers (if any bind mounts appear later)
+data/
+
+/generated/prisma

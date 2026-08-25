@@ -1,0 +1,39 @@
+:root {
+  // Brand
+  --it-color-primary: var(--it-palette-blue-500);
+  --it-color-primary-hover: var(--it-palette-blue-400);
+  --it-color-primary-dark: var(--it-palette-blue-600);
+
+  // Surfaces
+  --it-color-bg: var(--it-palette-gray-100);
+  --it-color-surface: var(--it-palette-white);
+
+  // Text
+  --it-color-text: var(--it-palette-gray-900);
+  --it-color-text-muted: var(--it-palette-gray-700);
+  --it-color-text-secondary: var(--it-palette-gray-500);
+
+  // Semantic
+  --it-color-error: var(--it-palette-red-500);
+  --it-color-success: var(--it-palette-green-500);
+  --it-color-warning: var(--it-palette-gold-500);
+  --it-color-border: var(--it-palette-gray-200);
+  --it-color-focus-ring: var(--it-palette-focus-ring);
+
+  // Shell header
+  --it-shell-bg: var(--it-palette-white);
+  --it-shell-text: var(--it-palette-gray-900);
+  --it-shell-text-muted: var(--it-palette-gray-700);
+  --it-shell-border: var(--it-palette-gray-200);
+  --it-shell-height: 56px;
+
+  // Dashboard tiles
+  --it-grid-tile-gap: 16px;
+  --it-grid-tile-radius: 4px;
+  --it-grid-tile-padding: 24px;
+  --it-grid-tile-border: 1px solid var(--it-color-border);
+  --it-grid-tile-shadow: none;
+
+  // Auth overlay
+  --it-auth-backdrop: rgb(0 0 0 / 72%);
+}

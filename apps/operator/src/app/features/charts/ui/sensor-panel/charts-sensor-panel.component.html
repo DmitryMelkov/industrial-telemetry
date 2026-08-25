@@ -1,0 +1,29 @@
+<aside class="charts-sensor-panel" [class.charts-sensor-panel--compact]="compact()">
+  <p class="typo typo--caption charts-sensor-panel__title">Показать датчики:</p>
+  <div class="charts-sensor-panel__list">
+    @for (sensor of sensors(); track sensor.id) {
+      <div
+        class="charts-sensor-panel__row"
+        [class.charts-sensor-panel__row--disabled]="isDisabled(sensor.id)"
+      >
+        <mat-checkbox
+          [checked]="isSelected(sensor.id)"
+          [disabled]="isDisabled(sensor.id)"
+          (change)="onToggle(sensor.id)"
+        >
+          <span class="charts-sensor-panel__label">
+            @if (seriesColor(sensor.id); as color) {
+              <span class="charts-sensor-panel__swatch" [style.background]="color"></span>
+            }
+            <span>
+              {{ sensor.code }}
+              @if (isPrimary(sensor.id)) {
+                <span class="charts-sensor-panel__primary"> (основной)</span>
+              }
+            </span>
+          </span>
+        </mat-checkbox>
+      </div>
+    }
+  </div>
+</aside>

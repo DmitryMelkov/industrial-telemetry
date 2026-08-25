@@ -1,0 +1,20 @@
+<div class="time-series-chart" [class.time-series-chart--compact]="compactMode()">
+  <div class="time-series-chart__canvas">
+    <canvas #canvas aria-label="График телеметрии"></canvas>
+  </div>
+  @if (zonesCaption()) {
+    <div class="time-series-chart__zones" aria-label="Легенда зон порогов">
+      <span class="typo typo--caption">{{ zonesCaption() }}</span>
+      <span
+        class="time-series-chart__swatch time-series-chart__swatch--warning"
+        title="warning"
+      ></span>
+      <span class="typo typo--caption">warning</span>
+      <span
+        class="time-series-chart__swatch time-series-chart__swatch--critical"
+        title="critical"
+      ></span>
+      <span class="typo typo--caption">critical</span>
+    </div>
+  }
+</div>

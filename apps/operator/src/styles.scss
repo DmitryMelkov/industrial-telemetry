@@ -1,0 +1,75 @@
+@use 'tokens';
+@use 'typography';
+@use 'material-theme';
+@use 'buttons';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--it-font-family);
+  color: var(--it-color-text);
+  background: var(--it-color-bg);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page {
+  margin: 0 auto;
+  max-width: var(--it-content-max-width);
+  padding: var(--it-page-padding-y) var(--it-page-padding-x);
+}
+
+.surface-card {
+  background: var(--it-color-surface);
+  border: var(--it-grid-tile-border);
+  border-radius: var(--it-grid-tile-radius);
+  box-shadow: var(--it-grid-tile-shadow);
+  padding: var(--it-grid-tile-padding);
+}
+
+.page-accent {
+  background: var(--it-color-primary);
+  border-radius: var(--it-radius-sm);
+  height: 3px;
+  margin: 12px auto 0;
+  width: 60px;
+}
+
+.charts-fullscreen-panel.mat-mdc-dialog-panel,
+.charts-fullscreen-panel {
+  --mdc-dialog-container-shape: 2px;
+}
+
+.charts-fullscreen-panel .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 2px;
+
+  padding: 0;
+}
+
+.charts-fullscreen-panel .mat-mdc-dialog-surface {
+  border-radius: 2px !important;
+}
+
+.charts-fullscreen-backdrop {
+  background: rgb(0 0 0 / 75%);
+  backdrop-filter: blur(2px);
+}

@@ -1,0 +1,12 @@
+:root {
+  --it-content-max-width: 1400px;
+  --it-page-padding-x: 24px;
+  --it-page-padding-y: 24px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --it-page-padding-x: 16px;
+    --it-page-padding-y: 16px;
+  }
+}

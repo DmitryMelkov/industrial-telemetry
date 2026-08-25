@@ -1,0 +1,71 @@
+@mixin typo-h1 {
+  font-size: var(--it-font-size-h1);
+  font-weight: var(--it-font-weight-semibold);
+  line-height: var(--it-line-height-tight);
+}
+
+@mixin typo-h2 {
+  font-size: var(--it-font-size-h2);
+  font-weight: var(--it-font-weight-semibold);
+  line-height: var(--it-line-height-tight);
+}
+
+@mixin typo-h6 {
+  font-size: var(--it-font-size-h6);
+  font-weight: var(--it-font-weight-bold);
+  letter-spacing: -0.252px;
+  line-height: var(--it-line-height-tight);
+}
+
+@mixin typo-body {
+  color: var(--it-color-text-muted);
+  font-size: var(--it-font-size-md);
+  font-weight: var(--it-font-weight-regular);
+  line-height: var(--it-line-height-normal);
+}
+
+@mixin typo-caption {
+  color: var(--it-color-text-secondary);
+  font-size: var(--it-font-size-sm);
+  line-height: var(--it-line-height-normal);
+}
+
+@mixin typo-tile-title {
+  font-size: var(--it-font-size-md);
+  font-weight: var(--it-font-weight-bold);
+  letter-spacing: -0.1px;
+  line-height: 1.57;
+}
+
+.typo {
+  color: var(--it-color-text);
+  margin: 0;
+}
+
+.typo--h1 {
+  @include typo-h1;
+}
+
+.typo--h2 {
+  @include typo-h2;
+}
+
+.typo--h6 {
+  @include typo-h6;
+}
+
+.typo--body {
+  @include typo-body;
+}
+
+.typo--caption {
+  @include typo-caption;
+}
+
+.typo--tile-title {
+  @include typo-tile-title;
+}
+
+.typo--error {
+  color: var(--it-color-error);
+}

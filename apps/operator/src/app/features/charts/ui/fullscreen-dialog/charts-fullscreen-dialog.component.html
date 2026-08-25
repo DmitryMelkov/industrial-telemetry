@@ -1,0 +1,32 @@
+<div class="charts-fullscreen">
+  <header class="charts-fullscreen__header">
+    <div class="charts-fullscreen__title-row">
+      <mat-icon class="charts-fullscreen__icon">show_chart</mat-icon>
+      <h2 class="typo typo--h6">Живой график датчиков</h2>
+    </div>
+    <button mat-icon-button type="button" aria-label="Закрыть" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="charts-fullscreen__layout">
+    <div class="charts-fullscreen__chart">
+      <app-time-series-chart
+        [series]="chartsService.series()"
+        [thresholds]="chartsService.primaryThresholds()"
+        [fromMs]="chartsService.axisFromMs()"
+        [toMs]="chartsService.axisToMs()"
+        [liveFollowNow]="chartsService.liveAppendEnabled()"
+        [heightPx]="560"
+      />
+      <p class="typo typo--caption charts-fullscreen__meta">{{ chartsService.chartCaption() }}</p>
+    </div>
+
+    <app-charts-sensor-panel
+      [sensors]="chartsService.sensors()"
+      [selectedIds]="chartsService.selectedSensorIds()"
+      [compact]="true"
+      (sensorToggle)="chartsService.toggleSensor($event)"
+    />
+  </div>
+</div>

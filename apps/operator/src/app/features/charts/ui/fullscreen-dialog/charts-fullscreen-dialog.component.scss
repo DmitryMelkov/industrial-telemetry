@@ -1,0 +1,51 @@
+.charts-fullscreen {
+  display: grid;
+  gap: var(--it-space-3);
+  padding: var(--it-space-4);
+}
+
+.charts-fullscreen__header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.charts-fullscreen__title-row {
+  align-items: center;
+  display: flex;
+  gap: var(--it-space-2);
+}
+
+.charts-fullscreen__icon {
+  color: var(--it-color-primary);
+}
+
+.charts-fullscreen__layout {
+  align-items: stretch;
+  display: flex;
+  gap: var(--it-space-4);
+  min-height: 0;
+}
+
+.charts-fullscreen__chart {
+  display: grid;
+  flex: 1;
+  grid-template-rows: 1fr auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.charts-fullscreen__meta {
+  margin: var(--it-space-2) 0 0;
+}
+
+.charts-fullscreen app-charts-sensor-panel {
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (width <= 900px) {
+  .charts-fullscreen__layout {
+    flex-direction: column;
+  }
+}

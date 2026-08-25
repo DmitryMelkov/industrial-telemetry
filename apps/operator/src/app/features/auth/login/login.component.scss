@@ -1,0 +1,66 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.login {
+  min-height: 100dvh;
+}
+
+.login__backdrop {
+  align-items: center;
+  backdrop-filter: blur(4px);
+  background: var(--it-auth-backdrop);
+  display: flex;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--it-space-6) var(--it-space-4);
+  position: relative;
+}
+
+.login__theme-toggle {
+  position: absolute;
+  right: var(--it-space-4);
+  top: var(--it-space-4);
+}
+
+.login__card {
+  max-width: 420px;
+  padding: 28px 24px 24px;
+  width: 100%;
+}
+
+[data-theme='dark'] .login__card {
+  box-shadow: 0 12px 40px rgb(0 0 0 / 55%);
+}
+
+.login__header {
+  margin-bottom: var(--it-space-6);
+  text-align: center;
+}
+
+.login__form {
+  display: grid;
+  gap: var(--it-space-4);
+}
+
+.login__submit {
+  gap: var(--it-space-2);
+  margin-top: var(--it-space-1);
+  width: 100%;
+}
+
+.login__error {
+  font-size: var(--it-font-size-sm);
+}
+
+.login__submit mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+mat-icon[matPrefix] {
+  color: var(--it-color-primary);
+  margin-right: var(--it-space-1);
+}

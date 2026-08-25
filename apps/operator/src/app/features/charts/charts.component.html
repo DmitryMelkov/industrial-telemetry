@@ -1,0 +1,171 @@
+<section class="charts page">
+  <div class="charts__hero surface-card">
+    <p class="typo typo--caption charts__eyebrow">Plant 01 / Live chart</p>
+    <h2 class="typo typo--h2 charts__title">Живой график датчиков</h2>
+    <p class="typo typo--body">
+      История за выбранный период и live-поток для окон до текущего момента. Можно выбрать до 4
+      датчиков. Колесо мыши — масштаб по времени, перетаскивание — сдвиг.
+    </p>
+  </div>
+
+  @if (chartsService.isLoading() && chartsService.sensors().length === 0) {
+    <section class="charts__state surface-card">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p class="typo typo--body">Загружаем историю телеметрии.</p>
+    </section>
+  } @else if (chartsService.errorMessage() && chartsService.sensors().length === 0) {
+    <section class="charts__state surface-card">
+      <h3 class="typo typo--h6">Не удалось загрузить график</h3>
+      <p class="typo typo--body">{{ chartsService.errorMessage() }}</p>
+      <button
+        class="btn btn--primary"
+        mat-flat-button
+        type="button"
+        (click)="chartsService.reload()"
+      >
+        Повторить
+      </button>
+    </section>
+  } @else if (chartsService.sensors().length === 0) {
+    <section class="charts__state surface-card">
+      <h3 class="typo typo--h6">Датчики не найдены</h3>
+      <p class="typo typo--body">
+        Для объекта пока нет датчиков, которые можно построить на графике.
+      </p>
+    </section>
+  } @else {
+    <section class="charts__workspace surface-card">
+      <div class="charts__panel-header">
+        <div>
+          <p class="typo typo--caption charts__eyebrow">Telemetry</p>
+          <h3 class="typo typo--h6">История и live-поток</h3>
+        </div>
+        <div class="charts__header-actions">
+          <mat-button-toggle-group
+            class="charts__range"
+            [value]="chartsService.rangePreset()"
+            (change)="onRangePresetChange($event)"
+            aria-label="Диапазон истории"
+            hideSingleSelectionIndicator
+          >
+            <mat-button-toggle value="1h">1ч</mat-button-toggle>
+            <mat-button-toggle value="6h">6ч</mat-button-toggle>
+            <mat-button-toggle value="24h">24ч</mat-button-toggle>
+            <mat-button-toggle value="custom">Свой</mat-button-toggle>
+          </mat-button-toggle-group>
+          @if (chartsService.isLoading()) {
+            <mat-spinner diameter="24"></mat-spinner>
+          }
+          <button
+            mat-icon-button
+            type="button"
+            class="charts__expand"
+            [disabled]="!chartsService.hasSeries()"
+            matTooltip="Открыть график на весь экран"
+            aria-label="Открыть график на весь экран"
+            (click)="openFullscreen()"
+          >
+            <mat-icon>open_in_full</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      @if (chartsService.rangePreset() === 'custom') {
+        <div class="charts__custom-range">
+          <div class="charts__datetime">
+            <p class="typo typo--caption charts__datetime-label">С</p>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Дата</mat-label>
+              <input
+                matInput
+                [matDatepicker]="fromDatePicker"
+                [ngModel]="customFrom()"
+                (ngModelChange)="onFromDate($event)"
+              />
+              <mat-datepicker-toggle matIconSuffix [for]="fromDatePicker" />
+              <mat-datepicker #fromDatePicker />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Время</mat-label>
+              <input
+                matInput
+                [matTimepicker]="fromTimePicker"
+                [ngModel]="customFrom()"
+                (ngModelChange)="onFromTime($event)"
+              />
+              <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker" />
+              <mat-timepicker #fromTimePicker interval="15m" />
+            </mat-form-field>
+          </div>
+
+          <div class="charts__datetime">
+            <p class="typo typo--caption charts__datetime-label">По</p>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Дата</mat-label>
+              <input
+                matInput
+                [matDatepicker]="toDatePicker"
+                [ngModel]="customTo()"
+                (ngModelChange)="onToDate($event)"
+              />
+              <mat-datepicker-toggle matIconSuffix [for]="toDatePicker" />
+              <mat-datepicker #toDatePicker />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Время</mat-label>
+              <input
+                matInput
+                [matTimepicker]="toTimePicker"
+                [ngModel]="customTo()"
+                (ngModelChange)="onToTime($event)"
+              />
+              <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" />
+              <mat-timepicker #toTimePicker interval="15m" />
+            </mat-form-field>
+          </div>
+
+          <button
+            class="btn btn--primary"
+            mat-flat-button
+            type="button"
+            (click)="applyCustomRange()"
+          >
+            Применить
+          </button>
+        </div>
+      }
+
+      @if (chartsService.customRangeError()) {
+        <p class="typo typo--error">{{ chartsService.customRangeError() }}</p>
+      }
+
+      @if (chartsService.errorMessage()) {
+        <p class="typo typo--error">{{ chartsService.errorMessage() }}</p>
+      }
+
+      <div class="charts__layout">
+        <div class="charts__chart">
+          @if (!chartsService.hasSeries()) {
+            <p class="typo typo--body">Нет точек за выбранный период</p>
+          } @else {
+            <app-time-series-chart
+              [series]="chartsService.series()"
+              [thresholds]="chartsService.primaryThresholds()"
+              [fromMs]="chartsService.axisFromMs()"
+              [toMs]="chartsService.axisToMs()"
+              [liveFollowNow]="chartsService.liveAppendEnabled()"
+              [heightPx]="360"
+            />
+            <p class="typo typo--caption charts__meta">{{ chartsService.chartCaption() }}</p>
+          }
+        </div>
+
+        <app-charts-sensor-panel
+          [sensors]="chartsService.sensors()"
+          [selectedIds]="chartsService.selectedSensorIds()"
+          (sensorToggle)="chartsService.toggleSensor($event)"
+        />
+      </div>
+    </section>
+  }
+</section>

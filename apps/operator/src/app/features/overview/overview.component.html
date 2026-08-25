@@ -1,0 +1,162 @@
+<section class="overview page">
+  <div class="overview__hero surface-card">
+    <p class="typo typo--caption overview__eyebrow">Plant 01 / Live overview</p>
+    <h2 class="typo typo--h2 overview__title">Оперативный обзор объекта</h2>
+    <p class="typo typo--body overview__description">
+      Актуальный snapshot по KPI и датчикам объекта
+      <span class="overview__site-id">{{ overviewService.siteId() }}</span>
+    </p>
+  </div>
+
+  @if (overviewService.isLoading()) {
+    <section class="overview__state surface-card">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p class="typo typo--body">Загружаем показатели и последние значения датчиков.</p>
+    </section>
+  } @else if (overviewService.errorMessage()) {
+    <section class="overview__state surface-card">
+      <h3 class="typo typo--h6">Не удалось загрузить overview</h3>
+      <p class="typo typo--body">{{ overviewService.errorMessage() }}</p>
+      <button
+        class="btn btn--primary"
+        mat-flat-button
+        type="button"
+        (click)="overviewService.loadOverview()"
+      >
+        Повторить
+      </button>
+    </section>
+  } @else if (!overviewService.hasSensors()) {
+    <section class="overview__state surface-card">
+      <h3 class="typo typo--h6">Датчики не найдены</h3>
+      <p class="typo typo--body">
+        Для объекта пока нет доступных датчиков или данных. Проверьте seed и подключение BFF.
+      </p>
+    </section>
+  } @else {
+    <section class="overview__summary">
+      @for (item of overviewService.summary(); track item.label) {
+        @if (item.route) {
+          <a
+            class="overview__tile surface-card"
+            [routerLink]="item.route"
+            [class.overview__tile--success]="item.tone === 'success'"
+            [class.overview__tile--warning]="item.tone === 'warning'"
+            [class.overview__tile--critical]="item.tone === 'critical'"
+            [class.overview__tile--unknown]="item.tone === 'unknown'"
+          >
+            <p class="typo typo--caption overview__tile-label">{{ item.label }}</p>
+            <p class="typo typo--h2 overview__tile-value">{{ item.value }}</p>
+          </a>
+        } @else {
+          <article
+            class="overview__tile surface-card"
+            [class.overview__tile--success]="item.tone === 'success'"
+            [class.overview__tile--warning]="item.tone === 'warning'"
+            [class.overview__tile--critical]="item.tone === 'critical'"
+            [class.overview__tile--unknown]="item.tone === 'unknown'"
+          >
+            <p class="typo typo--caption overview__tile-label">{{ item.label }}</p>
+            <p class="typo typo--h2 overview__tile-value">{{ item.value }}</p>
+          </article>
+        }
+      }
+    </section>
+
+    <section class="overview__sensors">
+      <div class="overview__panel-header">
+        <div>
+          <p class="typo typo--caption overview__panel-eyebrow">Latest telemetry</p>
+          <h3 class="typo typo--h6">Список датчиков</h3>
+        </div>
+        <div class="overview__panel-meta">
+          <p class="typo typo--body">{{ overviewService.sensors().length }} шт.</p>
+          <div class="overview__chips">
+            @let counts = overviewService.statusCounts();
+            <span
+              class="overview__chip overview__chip--ok"
+              [class.overview__chip--active]="counts.online > 0"
+            >
+              Онлайн {{ counts.online }}
+            </span>
+            <span
+              class="overview__chip overview__chip--alarm"
+              [class.overview__chip--active]="counts.alarm > 0"
+            >
+              Авария {{ counts.alarm }}
+            </span>
+            <span
+              class="overview__chip overview__chip--unknown"
+              [class.overview__chip--active]="counts.noSignal > 0"
+            >
+              Нет сигнала {{ counts.noSignal }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview__sensor-list">
+        @for (
+          sensor of overviewService.sensors();
+          track overviewService.trackSensor($index, sensor)
+        ) {
+          @let status = overviewService.displayStatus(sensor);
+          <article
+            class="overview__sensor surface-card"
+            [class.overview__sensor--ok]="status === 'ok'"
+            [class.overview__sensor--warning]="status === 'warning'"
+            [class.overview__sensor--critical]="status === 'critical'"
+            [class.overview__sensor--unknown]="status === 'unknown'"
+          >
+            <div class="overview__sensor-main">
+              <div>
+                <h4 class="typo typo--tile-title overview__sensor-code">{{ sensor.code }}</h4>
+                <p class="typo typo--caption">
+                  {{ overviewService.metricLabel(sensor.metric) }}
+                </p>
+              </div>
+              <span
+                class="overview__status"
+                [class.overview__status--ok]="status === 'ok'"
+                [class.overview__status--warning]="status === 'warning'"
+                [class.overview__status--critical]="status === 'critical'"
+                [class.overview__status--unknown]="status === 'unknown'"
+              >
+                {{ overviewService.statusLabel(status) }}
+              </span>
+            </div>
+
+            <div class="overview__sensor-meta">
+              <p
+                class="typo typo--h6 overview__sensor-value"
+                [class.overview__sensor-value--empty]="sensor.value === null"
+              >
+                @if (sensor.value !== null) {
+                  {{ sensor.value | number: '1.0-2' }} {{ sensor.unit }}
+                } @else {
+                  Нет сигнала
+                }
+              </p>
+              <p class="typo typo--caption">
+                @if (sensor.value === null) {
+                  Сигнал не поступает
+                } @else if (sensor.ts) {
+                  Обновлено {{ sensor.ts | date: 'dd.MM.yyyy, HH:mm' }}
+                } @else {
+                  Нет данных по времени обновления
+                }
+              </p>
+              <a
+                class="typo typo--caption overview__chart-link"
+                [routerLink]="['/charts']"
+                [queryParams]="{ sensorId: sensor.id }"
+              >
+                График
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</section>

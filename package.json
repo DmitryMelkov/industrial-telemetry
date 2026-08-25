@@ -1,0 +1,17 @@
+{
+  "name": "industrial-telemetry",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Industrial telemetry pet-system: NestJS backend + Angular operator + React admin",
+  "scripts": {
+    "dev:backend": "npm --prefix apps/backend run dev",
+    "dev:api": "npm --prefix apps/backend run infra:up && npm --prefix apps/backend run dev:api",
+    "dev:operator": "npm --prefix apps/operator start",
+    "dev:admin": "npm --prefix apps/admin run dev",
+    "infra:up": "npm --prefix apps/backend run infra:up",
+    "infra:down": "npm --prefix apps/backend run infra:down",
+    "lint:backend": "npm --prefix apps/backend run lint:check",
+    "lint:operator": "npm --prefix apps/operator run lint:check",
+    "lint:admin": "npm --prefix apps/admin run lint:check"
+  }
+}

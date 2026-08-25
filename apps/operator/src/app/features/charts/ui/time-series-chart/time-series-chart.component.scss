@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  height: var(--chart-height, 320px);
+  min-height: 0;
+  width: 100%;
+}
+
+.time-series-chart {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+}
+
+.time-series-chart__canvas {
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+}
+
+.time-series-chart canvas {
+  display: block;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.time-series-chart__zones {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--it-space-2);
+  margin-top: var(--it-space-2);
+}
+
+.time-series-chart__swatch {
+  border: 1px solid var(--it-color-border);
+  display: inline-block;
+  flex-shrink: 0;
+  height: 10px;
+  width: 10px;
+}
+
+.time-series-chart__swatch--warning {
+  background: color-mix(in srgb, var(--it-color-warning) 28%, transparent);
+}
+
+.time-series-chart__swatch--critical {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--it-color-error) 45%, transparent) 0 1px,
+      transparent 1px 4px
+    ),
+    color-mix(in srgb, var(--it-color-error) 35%, transparent);
+}

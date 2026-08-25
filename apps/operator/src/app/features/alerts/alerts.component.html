@@ -1,0 +1,204 @@
+<section class="alerts page">
+  <div class="alerts__hero surface-card">
+    <p class="typo typo--caption alerts__eyebrow">Plant 01 / Alerts journal</p>
+    <h2 class="typo typo--h2 alerts__title">Журнал алертов</h2>
+    <p class="typo typo--body">
+      История событий по объекту. Фильтры идут в API; live-поток не переписывает таблицу — только
+      счётчик новых записей.
+    </p>
+  </div>
+
+  <section class="alerts__panel surface-card">
+    <div class="alerts__filters">
+      <div class="alerts__filter-group">
+        <p class="typo typo--caption alerts__filter-label">Статус</p>
+        <mat-button-toggle-group
+          class="alerts__toggles"
+          [value]="alertsService.statusFilter()"
+          (change)="onStatusChange($event)"
+          aria-label="Статус алерта"
+          hideSingleSelectionIndicator
+        >
+          @for (filter of statusFilters; track filter.id) {
+            <mat-button-toggle [value]="filter.id">{{ filter.label }}</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+      </div>
+
+      <div class="alerts__filter-group">
+        <p class="typo typo--caption alerts__filter-label">Severity</p>
+        <mat-button-toggle-group
+          class="alerts__toggles"
+          [value]="alertsService.severityFilter()"
+          (change)="onSeverityChange($event)"
+          aria-label="Severity алерта"
+          hideSingleSelectionIndicator
+        >
+          @for (filter of severityFilters; track filter.id) {
+            <mat-button-toggle [value]="filter.id">{{ filter.label }}</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+      </div>
+
+      <div class="alerts__filter-group">
+        <p class="typo typo--caption alerts__filter-label">Период</p>
+        <mat-button-toggle-group
+          class="alerts__toggles"
+          [value]="alertsService.periodFilter()"
+          (change)="onPeriodChange($event)"
+          aria-label="Период openedAt"
+          hideSingleSelectionIndicator
+        >
+          @for (filter of periodFilters; track filter.id) {
+            <mat-button-toggle [value]="filter.id">{{ filter.label }}</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+      </div>
+    </div>
+
+    @if (alertsService.pendingLiveCount()) {
+      <div class="alerts__live-banner">
+        <p class="typo typo--body">
+          Новых событий: {{ alertsService.pendingLiveCount() }}. Таблица не прыгает сама.
+        </p>
+        <button
+          class="btn btn--primary"
+          mat-flat-button
+          type="button"
+          (click)="alertsService.loadAlerts()"
+        >
+          Обновить журнал
+        </button>
+      </div>
+    }
+  </section>
+
+  @if (alertsService.isLoading() && !alertsService.hasAlerts()) {
+    <section class="alerts__state surface-card">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p class="typo typo--body">Загружаем журнал алертов.</p>
+    </section>
+  } @else if (alertsService.errorMessage() && !alertsService.hasAlerts()) {
+    <section class="alerts__state surface-card">
+      <h3 class="typo typo--h6">Не удалось загрузить журнал</h3>
+      <p class="typo typo--body">{{ alertsService.errorMessage() }}</p>
+      <button
+        class="btn btn--primary"
+        mat-flat-button
+        type="button"
+        (click)="alertsService.loadAlerts()"
+      >
+        Повторить
+      </button>
+    </section>
+  } @else if (!alertsService.hasAlerts()) {
+    <section class="alerts__state surface-card">
+      <h3 class="typo typo--h6">Записей нет</h3>
+      <p class="typo typo--body">Для выбранных фильтров в журнале нет событий.</p>
+    </section>
+  } @else {
+    <section class="alerts__panel surface-card">
+      <div class="alerts__panel-header">
+        <div>
+          <p class="typo typo--caption alerts__eyebrow">Journal</p>
+          <h3 class="typo typo--h6">События объекта</h3>
+        </div>
+        <div class="alerts__header-meta">
+          <p class="typo typo--body alerts__meta">{{ alertsService.alerts().length }} шт.</p>
+          @if (alertsService.isLoading()) {
+            <mat-spinner diameter="24"></mat-spinner>
+          }
+        </div>
+      </div>
+
+      @if (alertsService.errorMessage()) {
+        <p class="typo typo--error">{{ alertsService.errorMessage() }}</p>
+      }
+
+      <div class="alerts__table-wrap">
+        <table mat-table [dataSource]="alertsService.alerts()" class="alerts__table">
+          <ng-container matColumnDef="openedAt">
+            <th mat-header-cell *matHeaderCellDef>Открыт</th>
+            <td mat-cell *matCellDef="let alert">
+              {{ alert.openedAt | date: 'dd.MM.yyyy, HH:mm:ss' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="sensor">
+            <th mat-header-cell *matHeaderCellDef>Датчик</th>
+            <td mat-cell *matCellDef="let alert">
+              {{ alert.sensor?.code ?? alert.sensorId }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="severity">
+            <th mat-header-cell *matHeaderCellDef>Severity</th>
+            <td mat-cell *matCellDef="let alert">
+              <span
+                class="alerts__badge"
+                [class.alerts__badge--critical]="alert.severity === 'critical'"
+                [class.alerts__badge--warning]="alert.severity === 'warning'"
+              >
+                {{ alertsService.severityLabel(alert.severity) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="message">
+            <th mat-header-cell *matHeaderCellDef>Сообщение</th>
+            <td mat-cell *matCellDef="let alert">{{ alert.message }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="value">
+            <th mat-header-cell *matHeaderCellDef>Значение</th>
+            <td mat-cell *matCellDef="let alert">
+              {{ alert.value | number: '1.0-2' }}
+              {{ alert.sensor?.unit }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Статус</th>
+            <td mat-cell *matCellDef="let alert">
+              {{ alertsService.statusLabel(alert.status) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let alert">
+              @if (alert.status === 'open') {
+                <button
+                  class="btn btn--primary"
+                  mat-flat-button
+                  type="button"
+                  [disabled]="alertsService.ackingAlertId() === alert.id"
+                  (click)="ackAlert($event, alert.id)"
+                >
+                  @if (alertsService.ackingAlertId() === alert.id) {
+                    Ack…
+                  } @else {
+                    Ack
+                  }
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let alert; columns: displayedColumns"
+            class="alerts__row"
+            [class.alerts__row--critical]="alert.severity === 'critical'"
+            [class.alerts__row--warning]="alert.severity === 'warning'"
+            [matTooltip]="'График ' + (alert.sensor?.code ?? alert.sensorId)"
+            tabindex="0"
+            (click)="openChart(alert.sensorId)"
+            (keydown.enter)="openChart(alert.sensorId)"
+          ></tr>
+        </table>
+      </div>
+    </section>
+  }
+</section>
