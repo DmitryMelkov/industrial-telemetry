@@ -1,6 +1,6 @@
 # apps/backend
 
-Backend и инфраструктура пет-проекта **Industrial Telemetry**: эмуляция промышленных датчиков, потоковая обработка, realtime-дашборды.
+Backend и инфраструктура **Industrial Telemetry** (демо / учебный стенд): эмуляция промышленных датчиков, потоковая обработка, realtime-дашборды.
 
 Часть монорепы `industrial-telemetry`. Фронты:
 
@@ -54,7 +54,7 @@ Backend и инфраструктура пет-проекта **Industrial Telem
 - Готово: `telemetry-consumer` → Tarantool + Mongo + Redis и `alert-consumer` → Postgres + Redis
 - Готово: `core-api` monitoring + sensors/thresholds/alerts REST и BFF auth/session proxy с ролями
 - Готово: WebSocket Redis → BFF → clients для telemetry и alerts
-- В работе: frontend screens
+- Готово: Operator (`apps/operator`) и Admin (`apps/admin`)
 
 ## Быстрый старт
 
@@ -93,13 +93,14 @@ Seed-логины (пароль `password123`):
 
 ```bash
 npm run prisma:studio   # GUI Postgres
+npm run prisma:seed     # стирает demo users/sensors/alerts и заливает seed
 npm run db:reset        # migrate reset + seed
 npm run infra:down      # остановить Docker
 ```
 
 ## Проверка live-датчика (Admin → Operator)
 
-Seed-датчики (T-101 / P-201 / V-301 / F-401 на site `11111111-1111-1111-1111-111111111111`) продолжают слать телеметрию как раньше. Новые датчики **не** нужно добавлять в `SEED_SENSORS`.
+Seed-датчики (T-101 / P-201 / V-301 / F-401 на site `11111111-1111-1111-1111-111111111111`) продолжают слать телеметрию как раньше. **T-101** периодически держит значение вне warning (иногда critical) дольше `ALERT_OPEN_DEBOUNCE_SECONDS`, чтобы в журнале появлялись open → ack → resolve. Новые датчики **не** нужно добавлять в `SEED_SENSORS`.
 
 1. `npm run dev` (infra + сервисы).
 2. Admin: создать датчик на demo site/line, `isActive=true`.

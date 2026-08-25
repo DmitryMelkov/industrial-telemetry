@@ -1,11 +1,17 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { KAFKA_TOPICS, type SeedSensorSpec, type TelemetryPoint } from '@it/common';
+import {
+  KAFKA_TOPICS,
+  sampleSensorValue,
+  type SeedSensorSpec,
+  type TelemetryPoint,
+} from '@it/common';
 import { KafkaProducerService } from './kafka-producer.service';
 import { SensorCatalogService } from './sensor-catalog.service';
 
 @Injectable()
 export class TelemetryGeneratorService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TelemetryGeneratorService.name);
+  private readonly startedAtMs = Date.now();
   private timer: ReturnType<typeof setInterval> | null = null;
   private tickInFlight = false;
   private publishedBatches = 0;
@@ -72,8 +78,7 @@ export class TelemetryGeneratorService implements OnModuleInit, OnModuleDestroy 
   }
 
   private buildPoint(sensor: SeedSensorSpec): TelemetryPoint {
-    const raw = sensor.baseValue + (Math.random() * 2 - 1) * sensor.noise;
-    const value = Math.round(raw * 100) / 100;
+    const value = sampleSensorValue(sensor, Date.now() - this.startedAtMs);
 
     return {
       sensorId: sensor.sensorId,

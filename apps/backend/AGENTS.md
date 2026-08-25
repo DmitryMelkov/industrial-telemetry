@@ -1,8 +1,8 @@
 # AI Context — apps/backend
 
-Пет-проект промышленного мониторинга: эмуляция датчиков → Kafka → хранилища → BFF → два фронта (Operator Angular / Admin React) в realtime.
+Система промышленного мониторинга (демо / учебный стенд): эмуляция датчиков → Kafka → хранилища → BFF → два фронта (Operator Angular / Admin React) в realtime.
 
-Часть монорепы `industrial-telemetry` (`apps/backend`). Фокус обучения: NestJS monorepo, Kafka, Redis, Tarantool, MongoDB, PostgreSQL, BFF, WebSocket, auth.
+Часть монорепы `industrial-telemetry` (`apps/backend`). Фокус: NestJS monorepo, Kafka, Redis, Tarantool, MongoDB, PostgreSQL, BFF, WebSocket, auth.
 
 ## Команды
 
@@ -60,7 +60,7 @@ Kafka UI: `http://localhost:8088`. Порты и URL — в `.env.example` (се
 
 ## Поток данных (happy path)
 
-1. Generator читает активные `sensors` из Postgres и публикует точки в Kafka `telemetry.raw`
+1. Generator читает активные `sensors` из Postgres и публикует точки в Kafka `telemetry.raw` (T-101 — демо-экскурсии за порог, остальные seed обычно в норме)
 2. `telemetry-consumer` → Tarantool + Mongo + Redis `telemetry:updates`
 3. `alert-consumer` при устойчивом нарушении порога → Postgres alerts + Redis `alerts:updates` (debounce / гистерезис, без отдельной БД алертов)
 4. BFF подписан на Redis → пушит в WebSocket
@@ -100,8 +100,7 @@ Kafka UI: `http://localhost:8088`. Порты и URL — в `.env.example` (се
 5. ~~Alerts~~
 6. ~~Auth + BFF REST~~
 7. ~~WebSocket~~
-8. Фронты (другие репы) — следующий этап
-8. Фронты (другие репы)
+8. ~~Фронты~~ — `apps/operator`, `apps/admin`
 
 ## Code style (Nest / TS)
 

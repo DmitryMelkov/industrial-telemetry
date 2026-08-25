@@ -85,7 +85,18 @@ export class SensorCatalogService {
     line: { siteId: string };
   }): SeedSensorSpec {
     const seed = SEED_BY_ID.get(row.id);
-    const signal = seed ?? METRIC_SIGNAL_DEFAULTS[row.metric];
+
+    if (seed) {
+      return {
+        ...seed,
+        siteId: row.line.siteId,
+        lineId: row.lineId,
+        metric: row.metric,
+        unit: row.unit,
+      };
+    }
+
+    const signal = METRIC_SIGNAL_DEFAULTS[row.metric];
 
     return {
       sensorId: row.id,

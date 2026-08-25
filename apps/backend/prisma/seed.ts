@@ -51,6 +51,7 @@ async function main() {
                   name: 'Oven temperature',
                   metric: 'temperature',
                   unit: '°C',
+                  // Generator: T-101 excursion 94 (warning) / 103 (critical); пороги не ужесточать.
                   thresholds: {
                     create: [
                       {

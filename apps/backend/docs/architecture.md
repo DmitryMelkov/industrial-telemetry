@@ -2,9 +2,9 @@
 
 ## Цель
 
-Пет-проект промышленного мониторинга: эмуляция датчиков → поток событий → хранилища → BFF → два фронта (Operator / Admin) в realtime.
+Система промышленного мониторинга (демо / учебный стенд): эмуляция датчиков → поток событий → хранилища → BFF → два фронта (Operator / Admin) в realtime.
 
-Фокус обучения: Kafka, Redis, Tarantool, MongoDB, PostgreSQL, BFF, WebSocket, auth.
+Стек: Kafka, Redis, Tarantool, MongoDB, PostgreSQL, BFF, WebSocket, auth.
 
 ## Высокоуровневая схема
 
@@ -74,7 +74,7 @@ flowchart LR
 
 ## Поток данных (happy path)
 
-1. Generator читает активные `sensors` из Postgres (refresh раз в `GENERATOR_SENSOR_REFRESH_MS`) и публикует точки в топик `telemetry.raw`. Профиль сигнала: seed-датчики — как в `SEED_SENSORS`; остальные — дефолты по `metric`.
+1. Generator читает активные `sensors` из Postgres (refresh раз в `GENERATOR_SENSOR_REFRESH_MS`) и публикует точки в топик `telemetry.raw`. Профиль сигнала: seed-датчики — как в `SEED_SENSORS` (у T-101 периодические экскурсии за порог для демо журнала); остальные — дефолты по `metric`.
 2. `telemetry-consumer`:
    - обновляет текущее значение в Tarantool;
    - пишет точку в MongoDB;
