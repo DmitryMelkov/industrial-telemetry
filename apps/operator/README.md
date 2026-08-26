@@ -7,6 +7,7 @@ Angular SPA для realtime-мониторинга промышленной те
 ## Роль MVP
 
 - Login через BFF и httpOnly cookie
+- Site picker в shell (объект для overview / charts / alerts / WS)
 - Overview: KPI и текущие значения датчиков
 - Живой график для 1–N датчиков
 - Лента алертов с подтверждением (`ack`)
@@ -23,7 +24,7 @@ Frontend обращается только к BFF из `apps/backend`. Прям�
 - Angular Signals для локального UI state
 - WebSocket через `/ws`
 
-NgRx, SSR, Module Federation и Angular Material в MVP не используются.
+NgRx, SSR и Module Federation в MVP не используются. Angular Material — да (shell site picker, alerts, charts controls).
 
 ## Статус
 

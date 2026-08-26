@@ -1,10 +1,10 @@
 import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged, filter, finalize } from 'rxjs';
 import { AlertsApiService } from '../../core/api/alerts-api.service';
 import { OverviewApiService } from '../../core/api/overview-api.service';
-import { DEMO_SITE_ID } from '../../core/config/demo-site';
 import { RealtimeEvent, RealtimeService } from '../../core/realtime/realtime.service';
+import { SelectedSiteService } from '../../core/site/selected-site.service';
 import {
   AlertStatus,
   OverviewSensor,
@@ -38,12 +38,22 @@ export class OverviewService {
   private readonly alertsApiService = inject(AlertsApiService);
   private readonly overviewApiService = inject(OverviewApiService);
   private readonly realtimeService = inject(RealtimeService);
+  private readonly selectedSiteService = inject(SelectedSiteService);
   private readonly overviewState = signal<SiteOverviewResponse | null>(null);
-  private readonly selectedSiteId = signal(DEMO_SITE_ID);
+  private readonly selectedSiteId = signal('');
   private readonly alertStatusById = new Map<string, AlertStatus>();
+  private siteWatchEnabled = false;
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
   readonly overview = this.overviewState.asReadonly();
+  readonly siteLabel = computed(() => {
+    const site = this.selectedSiteService.selectedSite();
+    if (site !== null) {
+      return `${site.name} (${site.code})`;
+    }
+
+    return this.siteId() || '—';
+  });
   readonly displayStatus = (sensor: OverviewSensor): SensorStatus => {
     if (sensor.value === null) {
       return 'unknown';
@@ -112,15 +122,42 @@ export class OverviewService {
     this.realtimeService.events$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => this.applyRealtimeEvent(event));
+
+    toObservable(this.selectedSiteService.siteId)
+      .pipe(
+        filter((siteId): siteId is string => siteId.length > 0),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((siteId) => {
+        if (!this.siteWatchEnabled || siteId === this.selectedSiteId()) {
+          return;
+        }
+
+        this.applySite(siteId);
+      });
   }
 
-  readonly initialize = (siteId = DEMO_SITE_ID): void => {
+  readonly initialize = (): void => {
+    this.selectedSiteService.ensureLoaded();
+    this.siteWatchEnabled = true;
+    const siteId = this.selectedSiteService.siteId();
+    if (siteId) {
+      this.applySite(siteId);
+    }
+  };
+
+  private applySite = (siteId: string): void => {
     this.selectedSiteId.set(siteId);
     this.loadOverview(siteId);
     this.realtimeService.connect(siteId);
   };
 
-  readonly loadOverview = (siteId = DEMO_SITE_ID): void => {
+  readonly loadOverview = (siteId = this.selectedSiteService.siteId()): void => {
+    if (!siteId) {
+      return;
+    }
+
     this.selectedSiteId.set(siteId);
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -134,10 +171,18 @@ export class OverviewService {
       )
       .subscribe({
         next: (overview) => {
+          if (this.selectedSiteId() !== siteId) {
+            return;
+          }
+
           this.overviewState.set(overview);
           this.seedOpenAlerts(siteId);
         },
         error: () => {
+          if (this.selectedSiteId() !== siteId) {
+            return;
+          }
+
           this.overviewState.set(null);
           this.errorMessage.set('Не удалось загрузить обзор объекта. Попробуйте обновить данные.');
         },
@@ -243,15 +288,11 @@ export class OverviewService {
     const wasOpen = previous === 'open';
     const isOpen = status === 'open';
 
-    if (isOpen && !wasOpen) {
+    if (!wasOpen && isOpen) {
       return currentOpenAlerts + 1;
     }
 
-    if (!isOpen && wasOpen) {
-      return Math.max(0, currentOpenAlerts - 1);
-    }
-
-    if (!isOpen && previous === undefined) {
+    if (wasOpen && !isOpen) {
       return Math.max(0, currentOpenAlerts - 1);
     }
 

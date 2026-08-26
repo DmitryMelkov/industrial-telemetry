@@ -3,6 +3,8 @@ import { of, Subject, throwError } from 'rxjs';
 import { AlertsApiService } from '../../core/api/alerts-api.service';
 import { DEMO_SITE_ID } from '../../core/config/demo-site';
 import { RealtimeService } from '../../core/realtime/realtime.service';
+import { createSelectedSiteServiceMock } from '../../core/site/selected-site.service.mock';
+import { SelectedSiteService } from '../../core/site/selected-site.service';
 import {
   AlertItem,
   RealtimeAlertPayload,
@@ -41,10 +43,11 @@ describe('AlertsService', () => {
 
   beforeEach(() => {
     alertsApiService = {
-      listAlerts: vi.fn(),
+      listAlerts: vi.fn().mockReturnValue(of([])),
       ackAlert: vi.fn(),
     };
     realtimeEvents$ = new Subject();
+    const selectedSite = createSelectedSiteServiceMock();
 
     TestBed.configureTestingModule({
       providers: [
@@ -58,6 +61,7 @@ describe('AlertsService', () => {
             events$: realtimeEvents$,
           },
         },
+        { provide: SelectedSiteService, useValue: selectedSite.mock },
       ],
     });
 

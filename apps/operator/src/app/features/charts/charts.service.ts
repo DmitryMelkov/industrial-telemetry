@@ -1,12 +1,12 @@
 import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { forkJoin, of } from 'rxjs';
-import { catchError, finalize, map } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, finalize, map } from 'rxjs/operators';
 import { HistoryApiService } from '../../core/api/history-api.service';
 import { OverviewApiService } from '../../core/api/overview-api.service';
 import { SensorsApiService } from '../../core/api/sensors-api.service';
-import { DEMO_SITE_ID } from '../../core/config/demo-site';
 import { RealtimeEvent, RealtimeService } from '../../core/realtime/realtime.service';
+import { SelectedSiteService } from '../../core/site/selected-site.service';
 import {
   OverviewSensor,
   SensorHistoryPoint,
@@ -54,7 +54,8 @@ export class ChartsService {
   private readonly overviewApiService = inject(OverviewApiService);
   private readonly sensorsApiService = inject(SensorsApiService);
   private readonly realtimeService = inject(RealtimeService);
-  private readonly selectedSiteId = signal(DEMO_SITE_ID);
+  private readonly selectedSiteService = inject(SelectedSiteService);
+  private readonly selectedSiteId = signal('');
   private readonly selectedIds = signal<string[]>([]);
   private readonly seriesState = signal<Record<string, ChartSeriesData>>({});
   private readonly rangePresetState = signal<ChartRangePreset>(DEFAULT_CHART_RANGE);
@@ -62,6 +63,8 @@ export class ChartsService {
   private readonly customToState = signal<string | null>(null);
   private historyRequestId = 0;
   private thresholdsRequestId = 0;
+  private preferredSensorId: string | null = null;
+  private siteWatchEnabled = false;
   readonly sensors = signal<OverviewSensor[]>([]);
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
@@ -100,25 +103,65 @@ export class ChartsService {
     this.realtimeService.events$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => this.applyRealtimeEvent(event));
+
+    toObservable(this.selectedSiteService.siteId)
+      .pipe(
+        filter((siteId): siteId is string => siteId.length > 0),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((siteId) => {
+        if (!this.siteWatchEnabled || siteId === this.selectedSiteId()) {
+          return;
+        }
+
+        this.reloadForSite(siteId);
+      });
   }
 
   readonly initialize = (preferredSensorId?: string | null): void => {
+    this.preferredSensorId = preferredSensorId ?? null;
+    this.selectedSiteService.ensureLoaded();
+    this.siteWatchEnabled = true;
+    const siteId = this.selectedSiteService.siteId();
+    if (siteId) {
+      this.reloadForSite(siteId);
+    }
+  };
+
+  private reloadForSite = (siteId: string): void => {
+    this.selectedSiteId.set(siteId);
     this.isLoading.set(true);
     this.errorMessage.set('');
-    this.realtimeService.connect(this.selectedSiteId());
+    this.sensors.set([]);
+    this.selectedIds.set([]);
+    this.seriesState.set({});
+    this.primaryThresholds.set([]);
+    this.realtimeService.connect(siteId);
+
+    const preferred = this.preferredSensorId;
+    this.preferredSensorId = null;
 
     this.overviewApiService
-      .getOverview(this.selectedSiteId())
+      .getOverview(siteId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (overview) => {
+          if (this.selectedSiteId() !== siteId) {
+            return;
+          }
+
           this.sensors.set(overview.sensors);
-          const initialIds = this.resolveInitialIds(overview.sensors, preferredSensorId);
+          const initialIds = this.resolveInitialIds(overview.sensors, preferred);
           this.selectedIds.set(initialIds);
           this.loadSeries(initialIds);
           this.loadPrimaryThresholds();
         },
         error: () => {
+          if (this.selectedSiteId() !== siteId) {
+            return;
+          }
+
           this.isLoading.set(false);
           this.errorMessage.set('Не удалось загрузить список датчиков для графика.');
         },
@@ -198,7 +241,13 @@ export class ChartsService {
   };
 
   readonly reload = (): void => {
-    this.initialize(this.selectedIds()[0] ?? null);
+    const siteId = this.selectedSiteId() || this.selectedSiteService.siteId();
+    if (!siteId) {
+      return;
+    }
+
+    this.preferredSensorId = this.selectedIds()[0] ?? null;
+    this.reloadForSite(siteId);
   };
 
   private resolveInitialIds(

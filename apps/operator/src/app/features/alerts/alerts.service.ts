@@ -1,9 +1,9 @@
 import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged, filter, finalize } from 'rxjs';
 import { AlertsApiService } from '../../core/api/alerts-api.service';
-import { DEMO_SITE_ID } from '../../core/config/demo-site';
 import { RealtimeEvent, RealtimeService } from '../../core/realtime/realtime.service';
+import { SelectedSiteService } from '../../core/site/selected-site.service';
 import {
   AlertItem,
   AlertSeverity,
@@ -25,8 +25,10 @@ export class AlertsService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly alertsApiService = inject(AlertsApiService);
   private readonly realtimeService = inject(RealtimeService);
-  private readonly selectedSiteId = signal(DEMO_SITE_ID);
+  private readonly selectedSiteService = inject(SelectedSiteService);
+  private readonly selectedSiteId = signal('');
   private readonly alertsState = signal<AlertItem[]>([]);
+  private siteWatchEnabled = false;
   readonly statusFilter = signal<AlertsStatusFilter>('all');
   readonly severityFilter = signal<AlertsSeverityFilter>('all');
   readonly periodFilter = signal<AlertsPeriodFilter>('all');
@@ -41,9 +43,32 @@ export class AlertsService {
     this.realtimeService.events$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => this.applyRealtimeEvent(event));
+
+    toObservable(this.selectedSiteService.siteId)
+      .pipe(
+        filter((siteId): siteId is string => siteId.length > 0),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((siteId) => {
+        if (!this.siteWatchEnabled || siteId === this.selectedSiteId()) {
+          return;
+        }
+
+        this.applySite(siteId);
+      });
   }
 
-  readonly initialize = (siteId = DEMO_SITE_ID): void => {
+  readonly initialize = (): void => {
+    this.selectedSiteService.ensureLoaded();
+    this.siteWatchEnabled = true;
+    const siteId = this.selectedSiteService.siteId();
+    if (siteId) {
+      this.applySite(siteId);
+    }
+  };
+
+  private applySite = (siteId: string): void => {
     this.selectedSiteId.set(siteId);
     this.realtimeService.connect(siteId);
     this.loadAlerts();
@@ -77,13 +102,18 @@ export class AlertsService {
   };
 
   readonly loadAlerts = (): void => {
+    const siteId = this.selectedSiteId() || this.selectedSiteService.siteId();
+    if (!siteId) {
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
     this.alertsApiService
       .listAlerts(
         buildAlertsListQuery({
-          siteId: this.selectedSiteId(),
+          siteId,
           status: this.statusFilter(),
           severity: this.severityFilter(),
           period: this.periodFilter(),
@@ -95,10 +125,18 @@ export class AlertsService {
       )
       .subscribe({
         next: (alerts) => {
+          if (this.selectedSiteId() !== siteId) {
+            return;
+          }
+
           this.alertsState.set(alerts.map((alert) => this.normalizeAlert(alert)));
           this.pendingLiveCount.set(0);
         },
         error: () => {
+          if (this.selectedSiteId() !== siteId) {
+            return;
+          }
+
           this.alertsState.set([]);
           this.errorMessage.set('Не удалось загрузить журнал алертов. Попробуйте обновить.');
         },

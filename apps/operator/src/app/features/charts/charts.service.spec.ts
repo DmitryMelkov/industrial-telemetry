@@ -3,7 +3,10 @@ import { of, Subject, throwError } from 'rxjs';
 import { HistoryApiService } from '../../core/api/history-api.service';
 import { OverviewApiService } from '../../core/api/overview-api.service';
 import { SensorsApiService } from '../../core/api/sensors-api.service';
+import { DEMO_SITE_ID } from '../../core/config/demo-site';
 import { RealtimeService } from '../../core/realtime/realtime.service';
+import { createSelectedSiteServiceMock } from '../../core/site/selected-site.service.mock';
+import { SelectedSiteService } from '../../core/site/selected-site.service';
 import {
   RealtimeAlertPayload,
   RealtimeTelemetryPayload,
@@ -27,7 +30,7 @@ describe('ChartsService', () => {
   >;
 
   const overviewResponse: SiteOverviewResponse = {
-    siteId: '11111111-1111-1111-1111-111111111111',
+    siteId: DEMO_SITE_ID,
     openAlerts: 0,
     sensors: [
       {
@@ -107,6 +110,7 @@ describe('ChartsService', () => {
     historyApiService = { getHistory: vi.fn() };
     sensorsApiService = { getSensor: vi.fn() };
     realtimeEvents$ = new Subject();
+    const selectedSite = createSelectedSiteServiceMock();
 
     TestBed.configureTestingModule({
       providers: [
@@ -122,6 +126,7 @@ describe('ChartsService', () => {
             events$: realtimeEvents$,
           },
         },
+        { provide: SelectedSiteService, useValue: selectedSite.mock },
       ],
     });
 

@@ -22,6 +22,30 @@
       >
     </nav>
     <div class="shell__actions">
+      <mat-form-field class="shell__site-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Объект</mat-label>
+        <mat-select
+          [value]="selectedSiteService.siteId()"
+          [disabled]="
+            selectedSiteService.isLoading() ||
+            !selectedSiteService.hasSites() ||
+            !!selectedSiteService.errorMessage()
+          "
+          panelClass="shell-site-panel"
+          (selectionChange)="onSiteChange($event.value)"
+        >
+          @for (site of selectedSiteService.sites(); track site.id) {
+            <mat-option [value]="site.id">{{ site.name }} ({{ site.code }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (selectedSiteService.errorMessage()) {
+        <span class="typo typo--caption shell__site-hint">{{
+          selectedSiteService.errorMessage()
+        }}</span>
+      } @else if (!selectedSiteService.isLoading() && !selectedSiteService.hasSites()) {
+        <span class="typo typo--caption shell__site-hint">Нет объектов</span>
+      }
       @if (authService.currentUser$ | async; as user) {
         <span class="typo typo--caption shell__email">{{ user.email }}</span>
       }

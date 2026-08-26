@@ -51,22 +51,61 @@
   align-items: center;
   display: flex;
   flex: 1;
-  gap: var(--it-space-1);
+  gap: var(--it-space-3);
   justify-content: flex-end;
   min-width: 0;
 }
 
+.shell__site-field {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-outlined-outline-width: 1px;
+  --mat-form-field-outlined-focus-outline-width: 1px;
+
+  flex: 0 0 auto;
+  font-size: 13px;
+  max-width: 240px;
+  min-width: 180px;
+  width: 220px;
+}
+
+.shell__site-hint {
+  color: var(--it-shell-text-muted);
+  flex-shrink: 1;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .shell__email {
   color: var(--it-shell-text-muted);
+  flex-shrink: 1;
   margin-right: var(--it-space-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shell__main {
   flex: 1;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .shell__email {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell__site-field {
+    max-width: 160px;
+    min-width: 132px;
+    width: 160px;
+  }
+
+  .shell__site-hint {
     display: none;
   }
 }

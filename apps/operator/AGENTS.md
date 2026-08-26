@@ -171,6 +171,15 @@ Live-правило: для raw-окна (≤ 2ч) append как есть; дл�
 **Login:** centered card 420px на blur backdrop (как AuthModal).  
 **Shell:** sticky header paper + border-bottom.
 
+## Site picker
+
+- `SelectedSiteService` (`core/site`) — single source of truth для `siteId`.
+- Список: `GET /api/sites` (`SitesApiService`).
+- Default: `DEMO_SITE_ID`, если есть в каталоге; иначе первый site.
+- Persist: `localStorage` ключ `it-operator-site-id` (валидация при старте).
+- Shell header: `mat-select` (code — name). Смена site → overview/charts/alerts reload + `RealtimeService.connect(newSiteId)`.
+- Константа `DEMO_SITE_ID` — только fallback, не «текущий site» в фичах.
+
 ## Порядок реализации (Operator MVP)
 
 1. `ng new` + proxy + `core/auth` + login page
@@ -193,10 +202,12 @@ Live-правило: для raw-окна (≤ 2ч) append как есть; дл�
 ### Smoke
 
 1. Login `operator@telemetry.local` / `password123`.
-2. Overview: KPI «Открытые алерты» читается, карточки без пульсации каждую секунду.
-3. `/alerts`: таблица, фильтры status / severity / period перезагружают список.
-4. Ack на open → статус строки `acked` (или строка исчезает на фильтре «Открытые»).
-5. Клик по строке → график с этим `sensorId`.
+2. Header: объект Demo Plant / PLANT-1 (или сохранённый site).
+3. Overview: KPI «Открытые алерты» читается, карточки без пульсации каждую секунду; имя объекта, не голый UUID.
+4. `/alerts`: таблица, фильтры status / severity / period перезагружают список.
+5. Ack на open → статус строки `acked` (или строка исчезает на фильтре «Открытые»).
+6. Клик по строке → график с этим `sensorId`.
+7. Смена объекта в header → overview/charts/alerts без «хвостов» предыдущего site; F5 сохраняет выбор.
 
 ## Связанные apps
 
