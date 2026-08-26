@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prepare": "husky",
     "postinstall": "prisma generate",
     "build": "nest build",
     "build:all": "nest build bff && nest build core-api && nest build telemetry-generator && nest build telemetry-consumer && nest build alert-consumer",
@@ -78,9 +77,7 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
-    "husky": "^9.1.7",
     "jest": "^30.0.0",
-    "lint-staged": "^15.5.2",
     "prettier": "^3.4.2",
     "prisma": "^6.19.3",
     "source-map-support": "^0.5.21",
