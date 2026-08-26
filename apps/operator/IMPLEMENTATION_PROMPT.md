@@ -1,4 +1,4 @@
-# Промпт для агента: industrial-telemetry-operator (Angular MVP)
+# Промпт для агента: apps/operator (Angular MVP)
 
 Скопируй всё содержимое ниже (от «## Задача») и отдай другому агенту.
 
@@ -8,9 +8,9 @@
 
 Создай с нуля Angular-приложение **Operator dashboard** в репозитории:
 
-`C:\web\pet-projects\industrial-telemetry-operator`
+`apps/operator`
 
-Репозиторий сейчас **пустой** (только README.md и AGENTS.md). Backend **уже готов** в соседней папке `industrial-telemetry-backend`.
+Репозиторий сейчас **пустой** (только README.md и AGENTS.md). Backend **уже готов** в `apps/backend`.
 
 **Scope MVP Operator:**
 1. Login
@@ -24,7 +24,7 @@
 
 ## Контекст системы
 
-Pet-проект промышленного мониторинга:
+Система промышленного мониторинга (демо-стенд):
 
 ```
 Generator → Kafka → Consumers → Postgres/Mongo/Tarantool/Redis → BFF → Angular Operator
@@ -100,7 +100,7 @@ BFF prefix: **`/api`**. WebSocket: **`/ws`** (без `/api`).
 ## Структура проекта (создать)
 
 ```
-industrial-telemetry-operator/
+apps/operator/
   AGENTS.md                    # уже есть — прочитай и следуй
   README.md                    # обнови после scaffold
   proxy.conf.json
@@ -150,7 +150,7 @@ industrial-telemetry-operator/
 ### Шаг 1 — Scaffold
 
 ```bash
-cd C:\web\pet-projects\industrial-telemetry-operator
+cd apps/operator
 ng new . --directory=. --routing --style=scss --standalone --ssr=false --skip-git
 ```
 
@@ -306,7 +306,7 @@ export const routes: Routes = [
 Backend (отдельные терминалы):
 
 ```bash
-cd C:\web\pet-projects\industrial-telemetry-backend
+cd apps/backend
 npm run infra:up
 npm run start:core-api:dev
 npm run start:bff:dev
@@ -318,7 +318,7 @@ npm run start:alert-consumer:dev
 Frontend:
 
 ```bash
-cd C:\web\pet-projects\industrial-telemetry-operator
+cd apps/operator
 npm start
 # http://localhost:4200/login
 ```
@@ -327,8 +327,8 @@ npm start
 
 ## Что прочитать перед стартом
 
-- `C:\web\pet-projects\industrial-telemetry-operator\AGENTS.md`
-- `C:\web\pet-projects\industrial-telemetry-backend\docs\api-sketch.md`
+- `apps/operator/AGENTS.md`
+- `apps/backend/docs/api-sketch.md`
 
 ---
 
