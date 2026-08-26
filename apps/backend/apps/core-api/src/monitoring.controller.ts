@@ -20,6 +20,26 @@ export class MonitoringController {
     return this.monitoring.listSites();
   }
 
+  @Post('sites')
+  createSite(@Body() body: CreateSiteBody) {
+    return this.monitoring.createSite(body);
+  }
+
+  @Patch('sites/:id')
+  updateSite(@Param('id') id: string, @Body() body: UpdateSiteBody) {
+    return this.monitoring.updateSite(id, body);
+  }
+
+  @Post('sites/:siteId/lines')
+  createLine(@Param('siteId') siteId: string, @Body() body: CreateLineBody) {
+    return this.monitoring.createLine(siteId, body);
+  }
+
+  @Patch('lines/:id')
+  updateLine(@Param('id') id: string, @Body() body: UpdateLineBody) {
+    return this.monitoring.updateLine(id, body);
+  }
+
   @Get('sites/:siteId/overview')
   getOverview(@Param('siteId') siteId: string) {
     return this.monitoring.getOverview(siteId);
@@ -92,6 +112,26 @@ export class MonitoringController {
   ackAlert(@Param('id') id: string) {
     return this.monitoring.ackAlert(id);
   }
+}
+
+interface CreateSiteBody {
+  code: string;
+  name: string;
+}
+
+interface UpdateSiteBody {
+  code?: string;
+  name?: string;
+}
+
+interface CreateLineBody {
+  code: string;
+  name: string;
+}
+
+interface UpdateLineBody {
+  code?: string;
+  name?: string;
 }
 
 interface CreateSensorBody {

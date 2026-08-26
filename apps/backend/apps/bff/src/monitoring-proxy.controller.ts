@@ -10,7 +10,10 @@ export class MonitoringProxyController {
 
   @All([
     'sites',
+    'sites/:id',
+    'sites/:siteId/lines',
     'sites/:siteId/overview',
+    'lines/:id',
     'sensors',
     'sensors/:id',
     'sensors/:id/history',
@@ -56,10 +59,24 @@ export class MonitoringProxyController {
   }
 
   private requiresAdmin(method: string, path: string): boolean {
-    return (
-      (method === 'POST' && path === '/sensors') ||
-      (method === 'PATCH' && path.startsWith('/sensors/')) ||
-      (method === 'PUT' && path.startsWith('/sensors/'))
-    );
+    if (method === 'POST' && path === '/sensors') {
+      return true;
+    }
+    if ((method === 'PATCH' || method === 'PUT') && path.startsWith('/sensors/')) {
+      return true;
+    }
+    if (method === 'POST' && path === '/sites') {
+      return true;
+    }
+    if (method === 'PATCH' && /^\/sites\/[^/]+$/.test(path)) {
+      return true;
+    }
+    if (method === 'POST' && /^\/sites\/[^/]+\/lines$/.test(path)) {
+      return true;
+    }
+    if (method === 'PATCH' && path.startsWith('/lines/')) {
+      return true;
+    }
+    return false;
   }
 }

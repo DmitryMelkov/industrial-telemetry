@@ -52,7 +52,7 @@ Backend и инфраструктура **Industrial Telemetry** (демо / у�
 - Postgres schema + seed (Prisma) — готов
 - `telemetry-generator` → Kafka `telemetry.raw` по активным датчикам из Postgres — готов
 - Готово: `telemetry-consumer` → Tarantool + Mongo + Redis и `alert-consumer` → Postgres + Redis
-- Готово: `core-api` monitoring + sensors/thresholds/alerts REST и BFF auth/session proxy с ролями
+- Готово: `core-api` monitoring + sites/lines/sensors/thresholds/alerts REST и BFF auth/session proxy с ролями
 - Готово: WebSocket Redis → BFF → clients для telemetry и alerts
 - Готово: Operator (`apps/operator`) и Admin (`apps/admin`)
 

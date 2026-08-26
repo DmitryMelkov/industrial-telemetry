@@ -16,7 +16,11 @@ Auth: httpOnly cookie `it_session`. Сессии хранятся в Redis и и
 
 | Method | Path | Роли | Описание |
 |--------|------|------|----------|
-| GET | `/api/sites` | operator, admin | список объектов |
+| GET | `/api/sites` | operator, admin | список объектов (+ lines) |
+| POST | `/api/sites` | admin | создать объект `{ code, name }` |
+| PATCH | `/api/sites/:id` | admin | обновить объект `{ code?, name? }` |
+| POST | `/api/sites/:siteId/lines` | admin | создать линию `{ code, name }` |
+| PATCH | `/api/lines/:id` | admin | обновить линию `{ code?, name? }` |
 | GET | `/api/sites/:siteId/overview` | operator, admin | агрегаты + latest по датчикам (Tarantool + cache) |
 | GET | `/api/sensors` | operator, admin | фильтры: `siteId`, `lineId`, `metric` |
 | GET | `/api/sensors/:id` | operator, admin | карточка датчика + threshold |
@@ -46,11 +50,18 @@ Auth: httpOnly cookie `it_session`. Сессии хранятся в Redis и и
 
 | Method | Path | Роли | Описание |
 |--------|------|------|----------|
+| POST | `/api/sites` | admin | создать объект |
+| PATCH | `/api/sites/:id` | admin | обновить объект |
+| POST | `/api/sites/:siteId/lines` | admin | создать линию |
+| PATCH | `/api/lines/:id` | admin | обновить линию |
 | POST | `/api/sensors` | admin | создать датчик |
 | PATCH | `/api/sensors/:id` | admin | обновить |
 | PUT | `/api/sensors/:id/thresholds` | admin | задать min/max + severity |
 | GET | `/api/users` | admin | список пользователей |
 | POST | `/api/users` | admin | optional в MVP |
+
+Уникальности: `Site.code`; `Line(siteId, code)`. Конфликт → `409`. Пустые code/name → `400`. DELETE site/line — вне MVP.
+
 
 ## Alerts
 
@@ -112,7 +123,7 @@ URL: `WS /ws` (после auth через cookie `it_session`).
 }
 ```
 
-HTTP: `400` валидация, `401` нет auth, `403` роль, `404` не найдено, `500` внутренняя.
+HTTP: `400` валидация, `401` нет auth, `403` роль, `404` не найдено, `409` конфликт unique (code), `500` внутренняя.
 
 ## Не публикуем наружу
 

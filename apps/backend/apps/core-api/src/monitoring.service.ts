@@ -1,4 +1,12 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { MongoClient, type Collection } from 'mongodb';
 import TarantoolConnection from 'tarantool-driver';
 import {
@@ -7,8 +15,10 @@ import {
   mapHistoryBucket,
   parseAlertSeverity,
   parseAlertStatus,
+  parseCreateCodeName,
   parseHistoryInterval,
   parseIsoDate,
+  parsePatchCodeName,
   resolveHistoryBucketMs,
   type HistoryBucketRow,
 } from '@it/common';
@@ -91,6 +101,105 @@ export class MonitoringService implements OnModuleInit, OnModuleDestroy {
       orderBy: { code: 'asc' },
       include: { lines: { orderBy: { code: 'asc' } } },
     });
+  }
+
+  getSite(id: string) {
+    return this.prisma.site.findUniqueOrThrow({
+      where: { id },
+      include: { lines: { orderBy: { code: 'asc' } } },
+    });
+  }
+
+  async createSite(input: { code?: string; name?: string }) {
+    const parsed = parseCreateCodeName(input);
+    if (!parsed) {
+      throw new BadRequestException('code and name are required');
+    }
+
+    try {
+      return await this.prisma.site.create({
+        data: parsed,
+        include: { lines: { orderBy: { code: 'asc' } } },
+      });
+    } catch (error) {
+      this.rethrowPrisma(error, 'Site code already exists');
+    }
+  }
+
+  async updateSite(id: string, input: { code?: string; name?: string }) {
+    const parsed = parsePatchCodeName(input);
+    if (!parsed) {
+      throw new BadRequestException('code and name must be non-empty when provided');
+    }
+    if (Object.keys(parsed).length === 0) {
+      return this.getSite(id);
+    }
+
+    try {
+      return await this.prisma.site.update({
+        where: { id },
+        data: parsed,
+        include: { lines: { orderBy: { code: 'asc' } } },
+      });
+    } catch (error) {
+      this.rethrowPrisma(error, 'Site code already exists');
+    }
+  }
+
+  async createLine(siteId: string, input: { code?: string; name?: string }) {
+    const parsed = parseCreateCodeName(input);
+    if (!parsed) {
+      throw new BadRequestException('code and name are required');
+    }
+
+    const site = await this.prisma.site.findUnique({ where: { id: siteId } });
+    if (!site) {
+      throw new NotFoundException('Site not found');
+    }
+
+    try {
+      return await this.prisma.line.create({
+        data: { siteId, code: parsed.code, name: parsed.name },
+      });
+    } catch (error) {
+      this.rethrowPrisma(error, 'Line code already exists on this site');
+    }
+  }
+
+  async updateLine(id: string, input: { code?: string; name?: string }) {
+    const parsed = parsePatchCodeName(input);
+    if (!parsed) {
+      throw new BadRequestException('code and name must be non-empty when provided');
+    }
+
+    if (Object.keys(parsed).length === 0) {
+      try {
+        return await this.prisma.line.findUniqueOrThrow({ where: { id } });
+      } catch (error) {
+        this.rethrowPrisma(error, 'Line not found');
+      }
+    }
+
+    try {
+      return await this.prisma.line.update({
+        where: { id },
+        data: parsed,
+      });
+    } catch (error) {
+      this.rethrowPrisma(error, 'Line code already exists on this site');
+    }
+  }
+
+  private rethrowPrisma(error: unknown, conflictMessage: string): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(conflictMessage);
+      }
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Resource not found');
+      }
+    }
+    throw error;
   }
 
   listSensors(filters: { siteId?: string; lineId?: string; metric?: string }) {
