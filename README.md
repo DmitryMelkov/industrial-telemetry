@@ -148,8 +148,9 @@ Seed-датчики: T-101, P-201, V-301, F-401. **T-101** периодичес�
 3. Overview: KPI и текущие значения датчиков. T-101 в первые ~45 с после старта generator — warning (иногда critical), не только «Норма».
 4. Charts: живой график по датчику.
 5. Alerts journal: подождать **~30–60 с** экскурсию T-101 → событие `open` → ack → после возврата в норму и hysteresis (~20 с) статус `resolved`.
-6. Admin (`admin@telemetry.local`): список/создание датчика на demo site, `isActive=true`.
-7. После refresh каталога generator (~10 с) новый датчик появляется в Operator overview.
+6. Admin (`admin@telemetry.local`): объекты/линии CRUD; Home KPI; журнал `/alerts`; датчики `isActive`; создание датчика на новой линии.
+7. Operator: выбрать новый объект в header → overview показывает его датчики (после ~10 с catalog refresh generator). F5 сохраняет выбор. Operator POST `/api/sites` → 403.
+
 
 ## Документация по apps
 
