@@ -77,6 +77,7 @@ export const AdminShell = observer(function AdminShell() {
             <ShellLink to="/" end>
               Главная
             </ShellLink>
+            <ShellLink to="/sites">Объекты</ShellLink>
             <ShellLink to="/sensors">Датчики</ShellLink>
             <ShellLink to="/alerts">Алерты</ShellLink>
           </Nav>

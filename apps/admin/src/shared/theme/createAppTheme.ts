@@ -20,10 +20,25 @@ const baseOptions: ThemeOptions = {
         disableElevation: true,
       },
     },
+    MuiFormControl: {
+      defaultProps: {
+        size: 'small',
+      },
+    },
     MuiTextField: {
       defaultProps: {
         size: 'small',
         fullWidth: true,
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        size: 'small',
+      },
+    },
+    MuiInputLabel: {
+      defaultProps: {
+        size: 'small',
       },
     },
   },

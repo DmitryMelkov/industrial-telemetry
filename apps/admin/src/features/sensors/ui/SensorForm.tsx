@@ -109,19 +109,26 @@ export function SensorForm({
         </Select>
       </FormControl>
 
-      <FormControl disabled={isEdit} required>
+      <FormControl disabled={isEdit || !values.siteId} required>
         <InputLabel id="sensor-line">Линия</InputLabel>
         <Select
           labelId="sensor-line"
           label="Линия"
           value={values.lineId}
           onChange={(event) => setField('lineId', event.target.value)}
+          displayEmpty
         >
-          {lines.map((line) => (
-            <MenuItem key={line.id} value={line.id}>
-              {line.name} ({line.code})
+          {lines.length === 0 ? (
+            <MenuItem value="" disabled>
+              Нет линий — создайте на странице объекта
             </MenuItem>
-          ))}
+          ) : (
+            lines.map((line) => (
+              <MenuItem key={line.id} value={line.id}>
+                {line.name} ({line.code})
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
 
@@ -170,9 +177,14 @@ export function SensorForm({
           <Switch
             checked={values.isActive}
             onChange={(event) => setField('isActive', event.target.checked)}
+            color="primary"
           />
         }
-        label="Активен"
+        label={
+          values.isActive
+            ? 'Активен — участвует в генерации и мониторинге'
+            : 'Выключен — generator/Operator могут перестать слать/показывать'
+        }
       />
 
       <Actions>

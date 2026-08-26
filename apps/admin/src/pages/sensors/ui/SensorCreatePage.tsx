@@ -1,5 +1,5 @@
 import { Alert, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { snackbarStore } from '@features/feedback';
 import { defaultUnit, SensorForm, useCreateSensorMutation, useSitesQuery } from '@features/sensors';
@@ -17,11 +17,14 @@ const Page = styled.div`
 
 export function SensorCreatePage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const sitesQuery = useSitesQuery();
   const createMutation = useCreateSensorMutation();
   const sites = sitesQuery.data ?? [];
-  const defaultSite = sites.find((site) => site.id === DEMO_SITE_ID) ?? sites[0];
+  const preferredSiteId = params.get('siteId') ?? DEMO_SITE_ID;
+  const defaultSite = sites.find((site) => site.id === preferredSiteId) ?? sites[0];
   const defaultLine = defaultSite?.lines[0];
+  const backTo = `/sensors${params.toString() ? `?${params.toString()}` : ''}`;
 
   if (sitesQuery.isPending) {
     return <PageSpinner />;
@@ -57,7 +60,7 @@ export function SensorCreatePage() {
           }}
           isSubmitting={createMutation.isPending}
           submitLabel="Создать"
-          onCancel={() => navigate('/sensors')}
+          onCancel={() => navigate(backTo)}
           onSubmit={(values) => {
             createMutation.mutate(
               {
@@ -71,7 +74,8 @@ export function SensorCreatePage() {
               {
                 onSuccess: (sensor) => {
                   snackbarStore.show(`Датчик ${sensor.code} создан`);
-                  navigate(`/sensors/${sensor.id}/edit`);
+                  const editSearch = params.toString();
+                  navigate(`/sensors/${sensor.id}/edit${editSearch ? `?${editSearch}` : ''}`);
                 },
                 onError: (err) => {
                   snackbarStore.show(getApiErrorMessage(err, 'Не удалось создать датчик'), 'error');

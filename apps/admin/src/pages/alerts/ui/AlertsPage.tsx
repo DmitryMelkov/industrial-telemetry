@@ -1,9 +1,11 @@
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Alert,
   Button,
   Chip,
   FormControl,
   InputLabel,
+  Link as MuiLink,
   MenuItem,
   Select,
   Table,
@@ -14,18 +16,23 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useSearchParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import type { AlertStatus } from '@entities/alert';
 import type { AlertSeverity } from '@entities/sensor';
 import {
+  PERIOD_FILTERS,
+  SEVERITY_FILTERS,
   STATUS_FILTERS,
   formatAlertValue,
   formatOpenedAt,
+  resolveAlertsPeriod,
   severityLabel,
   statusLabel,
   useAckAlertMutation,
   useAlertsQuery,
+  type AlertsPeriodFilter,
 } from '@features/alerts';
 import { snackbarStore } from '@features/feedback';
 import { useSitesQuery } from '@features/sensors';
@@ -54,13 +61,21 @@ const TableWrap = styled(OutlinedPaper)`
 
 const Filters = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
   gap: 16px;
 
-  @media (max-width: 720px) {
+  @media (max-width: 960px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 `;
+
+function isPeriodFilter(value: string): value is AlertsPeriodFilter {
+  return value === 'all' || value === '1h' || value === '6h' || value === '24h';
+}
 
 function severityColor(severity: AlertSeverity): 'warning' | 'error' {
   return severity === 'critical' ? 'error' : 'warning';
@@ -83,19 +98,26 @@ export function AlertsPage() {
   const [params, setParams] = useSearchParams();
   const siteId = params.get('siteId') ?? '';
   const status = (params.get('status') ?? '') as AlertStatus | '';
+  const severity = (params.get('severity') ?? '') as AlertSeverity | '';
+  const periodParam = params.get('period') ?? 'all';
+  const period: AlertsPeriodFilter = isPeriodFilter(periodParam) ? periodParam : 'all';
+  const periodBounds = useMemo(() => resolveAlertsPeriod(period), [period]);
 
   const sitesQuery = useSitesQuery();
   const alertsQuery = useAlertsQuery({
     siteId: siteId || undefined,
     status: status || undefined,
+    severity: severity || undefined,
+    from: periodBounds.from,
+    to: periodBounds.to,
   });
   const ackMutation = useAckAlertMutation();
 
   const sites = sitesQuery.data ?? [];
 
-  const setFilter = (key: 'siteId' | 'status', value: string) => {
+  const setFilter = (key: 'siteId' | 'status' | 'severity' | 'period', value: string) => {
     const next = new URLSearchParams(params);
-    if (value) {
+    if (value && !(key === 'period' && value === 'all')) {
       next.set(key, value);
     } else {
       next.delete(key);
@@ -123,7 +145,16 @@ export function AlertsPage() {
   return (
     <Page>
       <Header>
-        <Typography variant="h4">Алерты</Typography>
+        <Typography variant="h4">Журнал алертов</Typography>
+        <Button
+          startIcon={<RefreshIcon />}
+          onClick={() => {
+            void alertsQuery.refetch();
+          }}
+          disabled={alertsQuery.isFetching}
+        >
+          Обновить
+        </Button>
       </Header>
 
       {error ? (
@@ -180,6 +211,38 @@ export function AlertsPage() {
               ))}
             </Select>
           </FormControl>
+
+          <FormControl>
+            <InputLabel id="filter-alert-severity">Уровень</InputLabel>
+            <Select
+              labelId="filter-alert-severity"
+              label="Уровень"
+              value={severity}
+              onChange={(event) => setFilter('severity', event.target.value)}
+            >
+              {SEVERITY_FILTERS.map((option) => (
+                <MenuItem key={option.value || 'all'} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <InputLabel id="filter-alert-period">Период</InputLabel>
+            <Select
+              labelId="filter-alert-period"
+              label="Период"
+              value={period}
+              onChange={(event) => setFilter('period', event.target.value)}
+            >
+              {PERIOD_FILTERS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Filters>
       </OutlinedPaper>
 
@@ -195,11 +258,11 @@ export function AlertsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Severity</TableCell>
+                  <TableCell>Opened</TableCell>
                   <TableCell>Датчик</TableCell>
+                  <TableCell>Уровень</TableCell>
                   <TableCell>Сообщение</TableCell>
                   <TableCell>Значение</TableCell>
-                  <TableCell>Opened</TableCell>
                   <TableCell>Статус</TableCell>
                   <TableCell align="right" />
                 </TableRow>
@@ -210,6 +273,19 @@ export function AlertsPage() {
 
                   return (
                     <TableRow key={alert.id} hover>
+                      <TableCell>{formatOpenedAt(alert.openedAt)}</TableCell>
+                      <TableCell>
+                        <MuiLink
+                          component={Link}
+                          to={`/sensors/${alert.sensor.id}/edit`}
+                          underline="hover"
+                        >
+                          {alert.sensor.code}
+                        </MuiLink>
+                        <Typography variant="caption" color="text.secondary" component="div">
+                          {alert.sensor.name}
+                        </Typography>
+                      </TableCell>
                       <TableCell>
                         <Chip
                           size="small"
@@ -218,17 +294,10 @@ export function AlertsPage() {
                           variant="outlined"
                         />
                       </TableCell>
-                      <TableCell>
-                        {alert.sensor.code}
-                        <Typography variant="caption" color="text.secondary" component="div">
-                          {alert.sensor.name}
-                        </Typography>
-                      </TableCell>
                       <TableCell>{alert.message}</TableCell>
                       <TableCell>
                         {formatAlertValue(alert.value)} {alert.sensor.unit}
                       </TableCell>
-                      <TableCell>{formatOpenedAt(alert.openedAt)}</TableCell>
                       <TableCell>
                         <Chip
                           size="small"

@@ -12,3 +12,23 @@ export interface Site {
   createdAt: string;
   lines: SiteLine[];
 }
+
+export interface CreateSitePayload {
+  code: string;
+  name: string;
+}
+
+export interface UpdateSitePayload {
+  code?: string;
+  name?: string;
+}
+
+export interface CreateLinePayload {
+  code: string;
+  name: string;
+}
+
+export interface UpdateLinePayload {
+  code?: string;
+  name?: string;
+}

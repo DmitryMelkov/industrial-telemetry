@@ -1,5 +1,5 @@
 import { Alert, Typography } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { snackbarStore } from '@features/feedback';
 import {
@@ -23,10 +23,12 @@ const Page = styled.div`
 export function SensorEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const sitesQuery = useSitesQuery();
   const sensorQuery = useSensorQuery(id);
   const updateMutation = useUpdateSensorMutation(id ?? '');
   const thresholdsMutation = useReplaceThresholdsMutation(id ?? '');
+  const backTo = `/sensors${params.toString() ? `?${params.toString()}` : ''}`;
 
   const sensor = sensorQuery.data;
   const sites = sitesQuery.data ?? [];
@@ -65,7 +67,7 @@ export function SensorEditPage() {
           }}
           isSubmitting={updateMutation.isPending}
           submitLabel="Сохранить"
-          onCancel={() => navigate('/sensors')}
+          onCancel={() => navigate(backTo)}
           onSubmit={(values) => {
             updateMutation.mutate(
               {

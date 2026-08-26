@@ -1,6 +1,6 @@
 # apps/admin
 
-React SPA — **Admin / Analytics** для конфигурации датчиков и просмотра алертов.
+React SPA — **Admin / Analytics** для конфигурации объектов, линий, датчиков и просмотра алертов.
 
 Часть монорепы `industrial-telemetry`. Корневой README: [../../README.md](../../README.md).
 
@@ -67,30 +67,31 @@ Husky + lint-staged на pre-commit.
 
 Server data **не** дублировать в MobX.
 
-## Stage 1
+## Фаза A
 
-- Scaffold, proxy, theme light/dark
-- Login + protected shell + guest route
-- Отказ при `role !== admin`
+Home KPI, журнал алертов (status/severity/period), датчики `isActive`.
 
-## Stage 2
+## Фаза B (текущая)
 
-- Список датчиков: `GET /api/sensors` с фильтром site / line / metric
-- Создание: `POST /api/sensors` (`/sensors/new`)
-- Редактирование: `PATCH /api/sensors/:id` + пороги `PUT /api/sensors/:id/thresholds`
-- Справочник объектов: `GET /api/sites`
-- TanStack Query (list/detail + invalidateQueries), MUI-таблица, snackbar, понятный 403
-- Навигация shell: Главная, Датчики
+Иерархия **объект → линия → датчик**.
 
-## Stage 3 (текущий)
+### Объекты (`/sites`, `/sites/:id`)
 
-- Лента алертов: `GET /api/alerts?siteId=&status=`
-- Подтверждение: `PATCH /api/alerts/:id/ack` (кнопка только для `open`)
-- Фильтры: объект, статус (`open` / `acked` / `resolved` / all)
-- TanStack Query (`useAlertsQuery`, `useAckAlertMutation` + invalidate), snackbar, понятный 403
-- Навигация shell: Главная, Датчики, Алерты
+- Список: code, name, число линий; открыть / датчики
+- Карточка: edit site; create/edit линий; ссылки на `/sensors?siteId=&lineId=`
+- API: `POST/PATCH /sites`, `POST /sites/:siteId/lines`, `PATCH /lines/:id` (admin-only через BFF)
 
-Не в этом этапе: realtime/WebSocket, analytics charts, CRUD пользователей.
+### Датчики
+
+- Create: явный выбор site → lines (зависит от объекта); пустые линии — подсказка создать на странице объекта
+- Фильтры list в URL при new/edit → back
+
+### Home / Alerts (шлифовка)
+
+- CTA «Объекты»; KPI алертов `limit` до 500 + подпись
+- Labels severity/status по-русски (`Предупреждение` / `Критично`)
+
+Не в этой фазе: users CRUD, DELETE site/line/sensor, WebSocket, charts.
 
 ## Документация системы
 

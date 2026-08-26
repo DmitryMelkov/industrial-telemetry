@@ -3,7 +3,9 @@ import type { Alert, AlertsListParams } from '../model/types';
 
 function compactParams(params: AlertsListParams): Record<string, string> {
   return Object.fromEntries(
-    Object.entries(params).filter((entry): entry is [string, string] => Boolean(entry[1])),
+    Object.entries(params)
+      .filter(([, value]) => value !== undefined && value !== null && value !== '')
+      .map(([key, value]) => [key, String(value)]),
   );
 }
 

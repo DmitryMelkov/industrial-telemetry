@@ -34,13 +34,13 @@ Demo siteId: `11111111-1111-1111-1111-111111111111`.
 | Слой     | Путь        | Роль                                                              |
 | -------- | ----------- | ----------------------------------------------------------------- |
 | app      | `app/`      | providers, router, global styles                                  |
-| pages    | `pages/`    | login, home, forbidden, sensors (list/create/edit), alerts        |
+| pages    | `pages/`    | login, home, forbidden, sites, sensors (list/create/edit), alerts |
 | widgets  | `widgets/`  | admin-shell                                                       |
-| features | `features/` | auth, theme, feedback (snackbar), sensors, alerts (hooks, labels) |
+| features | `features/` | auth, theme, feedback, sites, sensors, alerts (hooks, labels)     |
 | entities | `entities/` | user, site, sensor, alert (types + API + query keys)              |
 | shared   | `shared/`   | http, apiError, theme factory, ui-примитивы                       |
 
-Публичный API слайса — через `index.ts`, где он есть.
+Публичный API слайса — через `index.ts`, где он есть. Features не импортируют соседние features.
 
 ## State rules
 
@@ -57,20 +57,24 @@ Demo siteId: `11111111-1111-1111-1111-111111111111`.
 - Protected: сессия обязательна
 - Admin: `role === 'admin'` → shell; иначе `/forbidden`
 - Bootstrap: `GET /api/auth/me` при старте
-- Admin shell: `/`, `/sensors`, `/sensors/new`, `/sensors/:id/edit`, `/alerts`
+- Admin shell: `/`, `/sites`, `/sites/:id`, `/sensors`, `/sensors/new`, `/sensors/:id/edit`, `/alerts`
 
-## Stage 2–3 API
+## Фаза B — API
 
-- `GET /api/sites`
-- `GET /api/sensors?siteId=&lineId=&metric=`
-- `GET /api/sensors/:id`
-- `POST /api/sensors`
-- `PATCH /api/sensors/:id`
-- `PUT /api/sensors/:id/thresholds`
-- `GET /api/alerts?siteId=&status=`
-- `PATCH /api/alerts/:id/ack`
+- `GET /api/sites` (+ lines)
+- `POST /api/sites`, `PATCH /api/sites/:id` — admin
+- `POST /api/sites/:siteId/lines`, `PATCH /api/lines/:id` — admin
+- Sensors / alerts как в Фазе A
 
-Мутации датчиков инвалидируют `sensorKeys.all`. Ack алерта — `alertKeys.all`. 403 показываем понятным текстом.
+Мутации sites/lines инвалидируют `siteKeys.all`. 403/409 — понятный текст.
+
+### Sites UI
+
+Список + detail (edit site, CRUD линий без DELETE). Ссылки на sensors с `siteId`/`lineId`.
+
+### Alerts labels
+
+severity: Предупреждение / Критично; status по-русски.
 
 ## Правила для агента
 
@@ -80,3 +84,5 @@ Demo siteId: `11111111-1111-1111-1111-111111111111`.
 - Realtime/WebSocket и аналитика — только когда явно в задаче.
 - UI: styled-components + MUI; Inter; primary `#1890ff`.
 - При расхождении с backend API — сверять `apps/backend/docs/api-sketch.md`.
+- Out of scope: users CRUD, DELETE site/line/sensor, WS, charts.
+- Follow-up: Operator site picker (сейчас DEMO_SITE_ID).

@@ -7,6 +7,8 @@ import { LoginPage } from '@pages/login/ui/LoginPage';
 import { SensorCreatePage } from '@pages/sensors/ui/SensorCreatePage';
 import { SensorEditPage } from '@pages/sensors/ui/SensorEditPage';
 import { SensorsPage } from '@pages/sensors/ui/SensorsPage';
+import { SiteDetailPage } from '@pages/sites/ui/SiteDetailPage';
+import { SitesPage } from '@pages/sites/ui/SitesPage';
 import { AdminShell } from '@widgets/admin-shell/ui/AdminShell';
 
 export function AppRouter() {
@@ -21,6 +23,8 @@ export function AppRouter() {
         <Route element={<AdminRoute />}>
           <Route element={<AdminShell />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/sites" element={<SitesPage />} />
+            <Route path="/sites/:id" element={<SiteDetailPage />} />
             <Route path="/sensors" element={<SensorsPage />} />
             <Route path="/sensors/new" element={<SensorCreatePage />} />
             <Route path="/sensors/:id/edit" element={<SensorEditPage />} />

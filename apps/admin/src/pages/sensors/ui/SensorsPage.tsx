@@ -45,10 +45,14 @@ const TableWrap = styled(OutlinedPaper)`
 
 const Filters = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
   gap: 16px;
 
-  @media (max-width: 720px) {
+  @media (max-width: 960px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -61,11 +65,25 @@ const METRIC_FILTERS: Array<{ value: '' | SensorMetric; label: string }> = [
   { value: 'flow', label: 'Расход' },
 ];
 
+type ActiveFilter = '' | 'active' | 'inactive';
+
+const ACTIVE_FILTERS: Array<{ value: ActiveFilter; label: string }> = [
+  { value: '', label: 'Все статусы' },
+  { value: 'active', label: 'Активные' },
+  { value: 'inactive', label: 'Выключенные' },
+];
+
+function sensorsListSearch(params: URLSearchParams): string {
+  const query = params.toString();
+  return query ? `?${query}` : '';
+}
+
 export function SensorsPage() {
   const [params, setParams] = useSearchParams();
   const siteId = params.get('siteId') ?? '';
   const lineId = params.get('lineId') ?? '';
   const metric = (params.get('metric') ?? '') as SensorMetric | '';
+  const active = (params.get('active') ?? '') as ActiveFilter;
 
   const sitesQuery = useSitesQuery();
   const sensorsQuery = useSensorsQuery({
@@ -83,7 +101,18 @@ export function SensorsPage() {
     [sitesQuery.data],
   );
 
-  const setFilter = (key: 'siteId' | 'lineId' | 'metric', value: string) => {
+  const sensors = useMemo(() => {
+    const list = sensorsQuery.data ?? [];
+    if (active === 'active') {
+      return list.filter((sensor) => sensor.isActive);
+    }
+    if (active === 'inactive') {
+      return list.filter((sensor) => !sensor.isActive);
+    }
+    return list;
+  }, [sensorsQuery.data, active]);
+
+  const setFilter = (key: 'siteId' | 'lineId' | 'metric' | 'active', value: string) => {
     const next = new URLSearchParams(params);
     if (value) {
       next.set(key, value);
@@ -96,7 +125,10 @@ export function SensorsPage() {
     setParams(next, { replace: true });
   };
 
+  const listSearch = sensorsListSearch(params);
+  const createTo = `/sensors/new${siteId ? `?siteId=${encodeURIComponent(siteId)}` : ''}`;
   const error = sitesQuery.error ?? sensorsQuery.error;
+  const hasServerSensors = (sensorsQuery.data?.length ?? 0) > 0;
 
   if (sitesQuery.isPending || sensorsQuery.isPending) {
     return <PageSpinner />;
@@ -106,7 +138,7 @@ export function SensorsPage() {
     <Page>
       <Header>
         <Typography variant="h4">Датчики</Typography>
-        <Button component={Link} to="/sensors/new" variant="contained" startIcon={<AddIcon />}>
+        <Button component={Link} to={createTo} variant="contained" startIcon={<AddIcon />}>
           Создать
         </Button>
       </Header>
@@ -182,14 +214,43 @@ export function SensorsPage() {
               ))}
             </Select>
           </FormControl>
+
+          <FormControl>
+            <InputLabel id="filter-active">Активность</InputLabel>
+            <Select
+              labelId="filter-active"
+              label="Активность"
+              value={active}
+              onChange={(event) => setFilter('active', event.target.value)}
+            >
+              {ACTIVE_FILTERS.map((option) => (
+                <MenuItem key={option.value || 'all'} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Filters>
       </OutlinedPaper>
 
-      {!error && (sensorsQuery.data?.length ?? 0) === 0 ? (
-        <Alert severity="info">Датчики не найдены. Измените фильтр или создайте новый.</Alert>
+      {!error && !hasServerSensors ? (
+        <Alert
+          severity="info"
+          action={
+            <Button color="inherit" size="small" component={Link} to={createTo}>
+              Создать датчик
+            </Button>
+          }
+        >
+          Нет датчиков — создайте первый или смените фильтр объекта.
+        </Alert>
       ) : null}
 
-      {(sensorsQuery.data?.length ?? 0) > 0 ? (
+      {!error && hasServerSensors && sensors.length === 0 ? (
+        <Alert severity="info">Нет датчиков по выбранным фильтрам.</Alert>
+      ) : null}
+
+      {sensors.length > 0 ? (
         <TableWrap>
           <TableContainer>
             <Table>
@@ -201,13 +262,13 @@ export function SensorsPage() {
                   <TableCell>Ед.</TableCell>
                   <TableCell>Линия</TableCell>
                   <TableCell>Объект</TableCell>
-                  <TableCell>Статус</TableCell>
+                  <TableCell>Активен</TableCell>
                   <TableCell>Пороги</TableCell>
                   <TableCell align="right" />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sensorsQuery.data?.map((sensor) => (
+                {sensors.map((sensor) => (
                   <TableRow key={sensor.id} hover>
                     <TableCell>{sensor.code}</TableCell>
                     <TableCell>{sensor.name}</TableCell>
@@ -225,7 +286,11 @@ export function SensorsPage() {
                     </TableCell>
                     <TableCell>{sensor.thresholds.length}</TableCell>
                     <TableCell align="right">
-                      <Button component={Link} to={`/sensors/${sensor.id}/edit`} size="small">
+                      <Button
+                        component={Link}
+                        to={`/sensors/${sensor.id}/edit${listSearch}`}
+                        size="small"
+                      >
                         Изменить
                       </Button>
                     </TableCell>

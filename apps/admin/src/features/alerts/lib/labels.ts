@@ -1,25 +1,39 @@
 import type { AlertStatus } from '@entities/alert';
 import type { AlertSeverity } from '@entities/sensor';
+import type { AlertsPeriodFilter } from './period';
 
 export const STATUS_FILTERS: Array<{ value: '' | AlertStatus; label: string }> = [
   { value: '', label: 'Все статусы' },
-  { value: 'open', label: 'Open' },
-  { value: 'acked', label: 'Acked' },
-  { value: 'resolved', label: 'Resolved' },
+  { value: 'open', label: 'Открыт' },
+  { value: 'acked', label: 'Подтверждён' },
+  { value: 'resolved', label: 'Закрыт' },
+];
+
+export const SEVERITY_FILTERS: Array<{ value: '' | AlertSeverity; label: string }> = [
+  { value: '', label: 'Все уровни' },
+  { value: 'warning', label: 'Предупреждение' },
+  { value: 'critical', label: 'Критично' },
+];
+
+export const PERIOD_FILTERS: Array<{ value: AlertsPeriodFilter; label: string }> = [
+  { value: 'all', label: 'Весь период' },
+  { value: '1h', label: '1 ч' },
+  { value: '6h', label: '6 ч' },
+  { value: '24h', label: '24 ч' },
 ];
 
 export function severityLabel(severity: AlertSeverity): string {
-  return severity === 'critical' ? 'Critical' : 'Warning';
+  return severity === 'critical' ? 'Критично' : 'Предупреждение';
 }
 
 export function statusLabel(status: AlertStatus): string {
   switch (status) {
     case 'open':
-      return 'Open';
+      return 'Открыт';
     case 'acked':
-      return 'Acked';
+      return 'Подтверждён';
     case 'resolved':
-      return 'Resolved';
+      return 'Закрыт';
     default:
       return status;
   }

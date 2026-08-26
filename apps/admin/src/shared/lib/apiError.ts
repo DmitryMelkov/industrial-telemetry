@@ -52,6 +52,10 @@ export function getApiErrorMessage(err: unknown, fallback = 'Не удалось
     return serverMessage ?? 'Ошибка валидации (400).';
   }
 
+  if (status === 409) {
+    return serverMessage ?? 'Конфликт данных (409). Возможно, код уже занят.';
+  }
+
   if (status === 401) {
     return 'Сессия истекла. Войдите снова.';
   }

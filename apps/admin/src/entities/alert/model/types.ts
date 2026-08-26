@@ -28,4 +28,9 @@ export interface Alert {
 export interface AlertsListParams {
   siteId?: string;
   status?: AlertStatus;
+  severity?: AlertSeverity;
+  from?: string;
+  to?: string;
+  limit?: number;
+  offset?: number;
 }
