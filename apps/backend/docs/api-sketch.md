@@ -57,10 +57,11 @@ Auth: httpOnly cookie `it_session`. Сессии хранятся в Redis и и
 | POST | `/api/sensors` | admin | создать датчик |
 | PATCH | `/api/sensors/:id` | admin | обновить |
 | PUT | `/api/sensors/:id/thresholds` | admin | задать min/max + severity |
-| GET | `/api/users` | admin | список пользователей |
-| POST | `/api/users` | admin | optional в MVP |
+| GET | `/api/users` | admin | список пользователей `{ id, email, role, createdAt }` (без password hash) |
+| POST | `/api/users` | admin | создать `{ email, password, role: operator\|admin }` |
+| PATCH | `/api/users/:id` | admin | обновить `{ email?, password?, role? }` (password опционален) |
 
-Уникальности: `Site.code`; `Line(siteId, code)`. Конфликт → `409`. Пустые code/name → `400`. DELETE site/line — вне MVP.
+Уникальности: `Site.code`; `Line(siteId, code)`; `User.email`. Конфликт → `409`. Пустые code/name / невалидный email / короткий password / неизвестная role → `400`. DELETE site/line/user — вне MVP.
 
 
 ## Alerts

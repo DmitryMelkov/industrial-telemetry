@@ -20,6 +20,8 @@ export class MonitoringProxyController {
     'sensors/:id/thresholds',
     'alerts',
     'alerts/:id/ack',
+    'users',
+    'users/:id',
   ])
   async proxy(
     @Req() request: BffRequest,
@@ -59,6 +61,9 @@ export class MonitoringProxyController {
   }
 
   private requiresAdmin(method: string, path: string): boolean {
+    if (path === '/users' || path.startsWith('/users/')) {
+      return true;
+    }
     if (method === 'POST' && path === '/sensors') {
       return true;
     }

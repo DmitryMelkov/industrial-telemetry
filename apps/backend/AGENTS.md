@@ -72,7 +72,7 @@ Kafka UI: `http://localhost:8088`. Порты и URL — в `.env.example` (се
 
 - Логин через BFF; роли: `operator` | `admin`
 - Operator: realtime + алерты (чтение/ack)
-- Admin: CRUD объектов/линий/датчиков/порогов (+ всё operator). DELETE site/line и users CRUD — вне текущего MVP.
+- Admin: CRUD объектов/линий/датчиков/порогов/пользователей (+ всё operator). DELETE site/line/user — вне текущего MVP.
 - Auth реализован через server-side session в Redis и httpOnly cookie `it_session` с TTL 8 часов.
 
 ## Правила для агента

@@ -112,6 +112,21 @@ export class MonitoringController {
   ackAlert(@Param('id') id: string) {
     return this.monitoring.ackAlert(id);
   }
+
+  @Get('users')
+  listUsers() {
+    return this.monitoring.listUsers();
+  }
+
+  @Post('users')
+  createUser(@Body() body: CreateUserBody) {
+    return this.monitoring.createUser(body);
+  }
+
+  @Patch('users/:id')
+  updateUser(@Param('id') id: string, @Body() body: UpdateUserBody) {
+    return this.monitoring.updateUser(id, body);
+  }
 }
 
 interface CreateSiteBody {
@@ -156,4 +171,16 @@ interface ReplaceThresholdsBody {
     maxValue?: number | null;
     severity: 'warning' | 'critical';
   }>;
+}
+
+interface CreateUserBody {
+  email: string;
+  password: string;
+  role: 'operator' | 'admin';
+}
+
+interface UpdateUserBody {
+  email?: string;
+  password?: string;
+  role?: 'operator' | 'admin';
 }

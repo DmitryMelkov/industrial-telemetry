@@ -7,6 +7,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { MongoClient, type Collection } from 'mongodb';
 import TarantoolConnection from 'tarantool-driver';
 import {
@@ -16,9 +17,11 @@ import {
   parseAlertSeverity,
   parseAlertStatus,
   parseCreateCodeName,
+  parseCreateUser,
   parseHistoryInterval,
   parseIsoDate,
   parsePatchCodeName,
+  parsePatchUser,
   resolveHistoryBucketMs,
   type HistoryBucketRow,
 } from '@it/common';
@@ -187,6 +190,81 @@ export class MonitoringService implements OnModuleInit, OnModuleDestroy {
       });
     } catch (error) {
       this.rethrowPrisma(error, 'Line code already exists on this site');
+    }
+  }
+
+  private static readonly userPublicSelect = {
+    id: true,
+    email: true,
+    role: true,
+    createdAt: true,
+  } as const;
+
+  listUsers() {
+    return this.prisma.user.findMany({
+      orderBy: { email: 'asc' },
+      select: MonitoringService.userPublicSelect,
+    });
+  }
+
+  async createUser(input: { email?: string; password?: string; role?: string }) {
+    const parsed = parseCreateUser(input);
+    if (!parsed) {
+      throw new BadRequestException(
+        'email, password (min 8) and role (operator|admin) are required',
+      );
+    }
+
+    try {
+      return await this.prisma.user.create({
+        data: {
+          email: parsed.email,
+          passwordHash: await bcrypt.hash(parsed.password, 10),
+          role: parsed.role,
+        },
+        select: MonitoringService.userPublicSelect,
+      });
+    } catch (error) {
+      this.rethrowPrisma(error, 'Email already exists');
+    }
+  }
+
+  async updateUser(id: string, input: { email?: string; password?: string; role?: string }) {
+    const parsed = parsePatchUser(input);
+    if (!parsed) {
+      throw new BadRequestException('email, password (min 8) and role must be valid when provided');
+    }
+
+    if (Object.keys(parsed).length === 0) {
+      try {
+        return await this.prisma.user.findUniqueOrThrow({
+          where: { id },
+          select: MonitoringService.userPublicSelect,
+        });
+      } catch (error) {
+        this.rethrowPrisma(error, 'User not found');
+      }
+    }
+
+    const data: Prisma.UserUpdateInput = {};
+    if (parsed.email !== undefined) {
+      data.email = parsed.email;
+    }
+    if (parsed.role !== undefined) {
+      data.role = parsed.role;
+    }
+    if (parsed.password !== undefined) {
+      data.passwordHash = await bcrypt.hash(parsed.password, 10);
+    }
+
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data,
+        select: MonitoringService.userPublicSelect,
+      });
+    } catch (error) {
+      this.rethrowPrisma(error, 'Email already exists');
     }
   }
 

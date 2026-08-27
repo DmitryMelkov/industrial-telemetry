@@ -5,4 +5,5 @@ export * from './constants/messaging';
 export * from './constants/seed-ids';
 export * from './constants/seed-sensors';
 export * from './constants/sites-payload';
+export * from './constants/users-payload';
 export * from './types/telemetry-point';
