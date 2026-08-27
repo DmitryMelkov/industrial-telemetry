@@ -25,5 +25,10 @@
   --it-grid-tile-border: 1px solid rgb(255 255 255 / 8%);
   --it-grid-tile-shadow: 0 1px 3px rgb(0 0 0 / 35%);
 
-  --it-auth-backdrop: rgb(0 0 0 / 82%);
+  --it-auth-backdrop: linear-gradient(
+    160deg,
+    #0d1b2a 0%,
+    var(--it-palette-canvas-dark) 50%,
+    var(--it-palette-surface-dark) 100%
+  );
 }

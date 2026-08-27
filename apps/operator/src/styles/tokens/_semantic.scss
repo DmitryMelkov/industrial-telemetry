@@ -34,6 +34,11 @@
   --it-grid-tile-border: 1px solid var(--it-color-border);
   --it-grid-tile-shadow: none;
 
-  // Auth overlay
-  --it-auth-backdrop: rgb(0 0 0 / 72%);
+  // Auth page background (light — same idea as Admin/Alarta, no dark dim)
+  --it-auth-backdrop: linear-gradient(
+    160deg,
+    #e6f4ff 0%,
+    var(--it-palette-gray-100) 45%,
+    var(--it-palette-white) 100%
+  );
 }

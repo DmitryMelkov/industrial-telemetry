@@ -28,8 +28,8 @@ NgRx, SSR и Module Federation в MVP не используются. Angular Mat
 
 ## Статус
 
-Angular-проект создан. Следующие этапы: dev proxy, auth/login, shell layout,
-overview, WebSocket telemetry, live chart и alerts.
+MVP Operator готов: auth, site picker, overview, charts, журнал алертов.
+Полный сценарий подъёма — в [корневом README](../../README.md).
 
 ## Локальный запуск
 

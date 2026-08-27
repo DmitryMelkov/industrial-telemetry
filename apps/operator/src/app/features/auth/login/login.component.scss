@@ -9,23 +9,27 @@
 
 .login__backdrop {
   align-items: center;
-  backdrop-filter: blur(4px);
   background: var(--it-auth-backdrop);
   display: flex;
   justify-content: center;
   min-height: 100dvh;
   padding: var(--it-space-6) var(--it-space-4);
-  position: relative;
 }
 
-.login__theme-toggle {
-  position: absolute;
-  right: var(--it-space-4);
-  top: var(--it-space-4);
+.login__panel {
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;
+  width: 100%;
+}
+
+.login__topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
 
 .login__card {
-  max-width: 420px;
   padding: 28px 24px 24px;
   width: 100%;
 }
