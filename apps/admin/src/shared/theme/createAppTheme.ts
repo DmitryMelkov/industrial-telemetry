@@ -2,7 +2,12 @@ import { createTheme, type Theme, type ThemeOptions } from '@mui/material/styles
 
 export type ThemeMode = 'light' | 'dark';
 
+/** Alarta-aligned palette (see alarta.pl APP_COLORS / Operator tokens). */
 const PRIMARY = '#1890ff';
+const BG_LIGHT = '#f5f7fa';
+const PAPER_LIGHT = '#ffffff';
+const BG_DARK = '#0f1014';
+const PAPER_DARK = '#1b1c22';
 
 const baseOptions: ThemeOptions = {
   typography: {
@@ -53,9 +58,18 @@ export function createAppTheme(mode: ThemeMode): Theme {
         main: PRIMARY,
       },
       background: {
-        default: mode === 'light' ? '#f5f7fa' : '#141414',
-        paper: mode === 'light' ? '#ffffff' : '#1f1f1f',
+        default: mode === 'light' ? BG_LIGHT : BG_DARK,
+        paper: mode === 'light' ? PAPER_LIGHT : PAPER_DARK,
       },
+      ...(mode === 'dark'
+        ? {
+            divider: 'rgba(255, 255, 255, 0.12)',
+            text: {
+              primary: '#e8eaed',
+              secondary: '#9ca3af',
+            },
+          }
+        : {}),
     },
   });
 }

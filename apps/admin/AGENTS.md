@@ -57,20 +57,25 @@ Demo siteId: `11111111-1111-1111-1111-111111111111`.
 - Protected: сессия обязательна
 - Admin: `role === 'admin'` → shell; иначе `/forbidden`
 - Bootstrap: `GET /api/auth/me` при старте
-- Admin shell: `/`, `/sites`, `/sites/:id`, `/sensors`, `/sensors/new`, `/sensors/:id/edit`, `/alerts`
+- Admin shell: `/`, `/sites`, `/sites/:id`, `/sensors`, `/sensors/new`, `/sensors/:id/edit`, `/alerts`, `/users`
 
 ## Фаза B — API
 
 - `GET /api/sites` (+ lines)
 - `POST /api/sites`, `PATCH /api/sites/:id` — admin
 - `POST /api/sites/:siteId/lines`, `PATCH /api/lines/:id` — admin
+- `GET /api/users`, `POST /api/users`, `PATCH /api/users/:id` — admin
 - Sensors / alerts как в Фазе A
 
-Мутации sites/lines инвалидируют `siteKeys.all`. 403/409 — понятный текст.
+Мутации sites/lines инвалидируют `siteKeys.all`. Users — `userKeys.all`. 403/409 — понятный текст.
 
 ### Sites UI
 
 Список + detail (edit site, CRUD линий без DELETE). Ссылки на sensors с `siteId`/`lineId`.
+
+### Users UI
+
+Список + create/edit (email, role, password: обязателен при create, опционален при edit). Без DELETE.
 
 ### Alerts labels
 
@@ -84,5 +89,5 @@ severity: Предупреждение / Критично; status по-русс�
 - Realtime/WebSocket и аналитика — только когда явно в задаче.
 - UI: styled-components + MUI; Inter; primary `#1890ff`.
 - При расхождении с backend API — сверять `apps/backend/docs/api-sketch.md`.
-- Out of scope: users CRUD, DELETE site/line/sensor, WS, charts.
+- Out of scope: DELETE site/line/sensor/user, WS, charts.
 - Follow-up: Operator site picker (сейчас DEMO_SITE_ID).

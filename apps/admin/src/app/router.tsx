@@ -9,6 +9,7 @@ import { SensorEditPage } from '@pages/sensors/ui/SensorEditPage';
 import { SensorsPage } from '@pages/sensors/ui/SensorsPage';
 import { SiteDetailPage } from '@pages/sites/ui/SiteDetailPage';
 import { SitesPage } from '@pages/sites/ui/SitesPage';
+import { UsersPage } from '@pages/users/ui/UsersPage';
 import { AdminShell } from '@widgets/admin-shell/ui/AdminShell';
 
 export function AppRouter() {
@@ -29,6 +30,7 @@ export function AppRouter() {
             <Route path="/sensors/new" element={<SensorCreatePage />} />
             <Route path="/sensors/:id/edit" element={<SensorEditPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/users" element={<UsersPage />} />
           </Route>
         </Route>
       </Route>

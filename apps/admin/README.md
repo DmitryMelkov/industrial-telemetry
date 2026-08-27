@@ -71,7 +71,9 @@ Server data **не** дублировать в MobX.
 
 Home KPI, журнал алертов (status/severity/period), датчики `isActive`.
 
-## Фаза B (текущая)
+## Фаза B (объекты + пользователи)
+
+Полный сценарий подъёма стенда — в [корневом README](../../README.md).
 
 Иерархия **объект → линия → датчик**.
 
@@ -91,7 +93,12 @@ Home KPI, журнал алертов (status/severity/period), датчики `
 - CTA «Объекты»; KPI алертов `limit` до 500 + подпись
 - Labels severity/status по-русски (`Предупреждение` / `Критично`)
 
-Не в этой фазе: users CRUD, DELETE site/line/sensor, WebSocket, charts.
+### Пользователи (`/users`)
+
+- Список: email, role, createdAt; create/edit (пароль обязателен при create)
+- API: `GET/POST /users`, `PATCH /users/:id` (admin-only через BFF)
+
+Не в этой фазе: DELETE site/line/sensor/user, WebSocket, charts.
 
 ## Документация системы
 

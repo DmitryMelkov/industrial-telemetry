@@ -28,8 +28,8 @@ const Page = styled.div`
   align-items: center;
   background: ${({ theme }) =>
     theme.palette.mode === 'light'
-      ? 'linear-gradient(160deg, #e6f4ff 0%, #f5f7fa 45%, #ffffff 100%)'
-      : 'linear-gradient(160deg, #0d1b2a 0%, #141414 50%, #1f1f1f 100%)'};
+      ? `linear-gradient(160deg, #e6f4ff 0%, ${theme.palette.background.default} 45%, ${theme.palette.background.paper} 100%)`
+      : `linear-gradient(160deg, #0d1b2a 0%, ${theme.palette.background.default} 50%, ${theme.palette.background.paper} 100%)`};
 `;
 
 const TopBar = styled.div`

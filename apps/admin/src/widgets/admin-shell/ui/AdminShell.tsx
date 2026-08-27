@@ -80,6 +80,7 @@ export const AdminShell = observer(function AdminShell() {
             <ShellLink to="/sites">Объекты</ShellLink>
             <ShellLink to="/sensors">Датчики</ShellLink>
             <ShellLink to="/alerts">Алерты</ShellLink>
+            <ShellLink to="/users">Пользователи</ShellLink>
           </Nav>
           <HeaderActions>
             <Typography variant="body2" color="text.secondary">
