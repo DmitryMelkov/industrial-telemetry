@@ -1,59 +1,131 @@
 # industrial-telemetry
 
-Система промышленной телеметрии (демо / учебный стенд): эмуляция датчиков → Kafka → хранилища → BFF → realtime-дашборды.
+Демо-стенд промышленной телеметрии: эмуляция датчиков → Kafka → хранилища → BFF → realtime-дашборды.
 
-Один репозиторий: backend + Operator (Angular) + Admin (React).
+Один репозиторий: **backend** (NestJS) + **Operator** (Angular) + **Admin** (React). Браузер ходит **только в BFF** `http://localhost:3000` (REST + WebSocket).
 
 ## Структура
 
 ```
 industrial-telemetry/
 ├── apps/
-│   ├── backend/    # NestJS monorepo, Docker Compose, Prisma, workers
-│   ├── operator/   # Angular SPA — мониторинг оператора (:4200)
-│   └── admin/      # React SPA — админка / датчики / алерты (:5173)
-├── package.json    # npm-скрипты + husky/lint-staged
+│   ├── backend/    # NestJS, Docker Compose, Prisma, generator/consumers
+│   ├── operator/   # Angular — мониторинг оператора (:4200)
+│   └── admin/      # React — конфигурация и пользователи (:5173)
+├── package.json    # скрипты с корня + husky/lint-staged
 ├── .husky/         # один pre-commit на mono
 └── README.md
 ```
 
-Фронты ходят **только в BFF** `http://localhost:3000` (REST + WebSocket). Прямого доступа к Kafka, Redis, Tarantool, Mongo, Postgres и Core API из браузера нет.
+| App | Документация |
+|-----|----------------|
+| Backend | [apps/backend/README.md](./apps/backend/README.md), [docs/](./apps/backend/docs/) |
+| Operator | [apps/operator/README.md](./apps/operator/README.md) |
+| Admin | [apps/admin/README.md](./apps/admin/README.md) |
 
-## Git: коммиты и push
+## Требования
 
-Один remote, один git root — `industrial-telemetry`. Ветка общая; «заливать только бэк / только фронт» = **stage и commit только нужный каталог** под `apps/`.
+- **Docker Desktop** (infra: Postgres, Mongo, Redis, Tarantool, Kafka)
+- **Node.js** + npm (для apps)
 
-После клонирования один раз в корне: `npm install` (ставит husky → `core.hooksPath=.husky`). Nested husky в apps нет.
+## Быстрый старт
 
-Pre-commit в корне гоняет `lint-staged` по каждому app (`--cwd`): линт/format только для **staged** файлов; пустой app пропускается. Правила — в `lint-staged` внутри `apps/*/package.json`.
+### 0. Корень mono (один раз после clone)
 
 ```bash
-cd C:/web/pet-projects/industrial-telemetry
-
-# только backend
-git add apps/backend
-git commit -m "fix(backend): …"
-git push
-
-# только operator
-git add apps/operator
-git commit -m "feat(operator): …"
-git push
-
-# только admin
-git add apps/admin
-git commit -m "feat(admin): …"
-git push
-
-# несколько apps — лучше два (или три) коммита, не один мешок
-git add apps/backend
-git commit -m "fix(backend): …"
-git add apps/operator
-git commit -m "fix(operator): …"
-git push
+cd industrial-telemetry
+npm install   # husky → core.hooksPath=.husky
 ```
 
-Не коммитить `.env`, секреты и локальные артефакты. `.env.example` — ок.
+### 1. Backend + infra
+
+```bash
+cd apps/backend
+cp .env.example .env   # один раз; не коммитить
+npm install
+npm run infra:up
+npm run prisma:migrate # или prisma:deploy
+npm run prisma:seed    # перезаливает demo users/sensors/alerts
+npm run dev            # infra + все Nest apps (bff, core-api, generator, consumers)
+```
+
+Из корня mono:
+
+```bash
+npm run infra:up
+npm run dev:backend
+```
+
+Проверки:
+
+| Сервис | URL |
+|--------|-----|
+| BFF | http://localhost:3000/health |
+| core-api | http://localhost:3001/health |
+| Kafka UI | http://localhost:8088 |
+
+Только API без generator/consumers (удобно для чистого Admin auth):
+
+```bash
+npm run dev:api
+# или: cd apps/backend && npm run infra:up && npm run dev:api
+```
+
+Для полного smoke (live + алерты) нужен именно **`dev` / `dev:backend`** с generator.
+
+### 2. Operator
+
+```bash
+cd apps/operator
+npm install
+npm start
+# из корня: npm run dev:operator
+```
+
+→ http://localhost:4200/
+
+### 3. Admin
+
+```bash
+cd apps/admin
+npm install
+npm run dev
+# из корня: npm run dev:admin
+```
+
+→ http://localhost:5173/ (dev-proxy `/api` → `:3000`)
+
+## Demo-учётки (seed)
+
+Пароль для обоих: **`password123`**
+
+| Роль | Email |
+|------|--------|
+| Admin | `admin@telemetry.local` |
+| Operator | `operator@telemetry.local` |
+
+Demo site: `PLANT-1` / id `11111111-1111-1111-1111-111111111111`  
+Seed-датчики: T-101, P-201, V-301, F-401. **T-101** периодически уходит за warning (иногда critical) дольше debounce (~20 с), чтобы журнал и overview не были вечно «Норма».
+
+Повторный `npm run prisma:seed` **удаляет** demo users/sensors/alerts и заливает seed заново.
+
+## E2E smoke «с нуля»
+
+Цель: за один проход убедиться, что пайплайн, Admin и Operator стыкуются.
+
+1. **Поднять** backend (`npm run dev:backend`) + Operator + Admin (см. выше).
+2. **Admin** — login `admin@telemetry.local` / `password123`.
+3. **Пользователи** (опционально) — создать operator, например `op2@telemetry.local` / `password123`; либо использовать seed-operator.
+4. **Объекты** — создать site + линию (или взять `PLANT-1`).
+5. **Датчики** — на линии создать датчик с `isActive=true` и порогами (или смотреть seed T-101).
+6. **Operator** — login operator → в header выбрать нужный **объект**:
+   - **Обзор** — KPI и live-значения (~10 с после появления датчика в catalog generator);
+   - **График** — история + live;
+   - **Журнал** — для T-101 подождать ~30–60 с экскурсию → `open` → ack → после нормы и hysteresis (~20 с) → `resolved`.
+7. **Права:** operator не создаёт объекты/пользователей (API → 403). Смену пароля делает admin в **Пользователи**.
+8. **F5** в Operator сохраняет выбранный объект (`localStorage`).
+
+Краткий путь только на seed (без нового site): шаги 1–2 → Operator на `PLANT-1` → T-101 live / chart / journal.
 
 ## Стек
 
@@ -65,99 +137,31 @@ git push
 | Cache / pub-sub | Redis |
 | History | MongoDB |
 | Master data | PostgreSQL + Prisma |
-| Operator UI | Angular 22, Material, Chart.js, WebSocket |
-| Admin UI | React 19, Vite, MUI, MobX, TanStack Query |
+| Operator UI | Angular, Material, Chart.js, WebSocket |
+| Admin UI | React, Vite, MUI, MobX, TanStack Query |
 
-## Быстрый старт
+## Git: коммиты и push
 
-Нужен **Docker Desktop**.
+Один remote, один git root. «Залить только бэк / только фронт» = stage нужного каталога под `apps/`.
 
-### 1. Backend + infra
-
-```bash
-cd apps/backend
-cp .env.example .env   # один раз; не коммитить
-npm install
-npm run infra:up       # Postgres, Mongo, Redis, Tarantool, Kafka, Kafka UI
-npm run prisma:migrate # или prisma:deploy
-npm run prisma:seed    # стирает demo-данные (users/sensors/alerts) и заливает заново
-npm run dev            # infra + все Nest apps в watch
-```
-
-Из корня монорепы можно так же:
+После clone один раз в корне: `npm install` (husky). Nested husky в apps нет. Pre-commit гоняет `lint-staged` по каждому app (`--cwd`) только для **staged** файлов.
 
 ```bash
-npm run infra:up
-npm run dev:backend
+cd industrial-telemetry
+
+git add apps/backend
+git commit -m "fix(backend): …"
+git push
+
+git add apps/operator
+git commit -m "feat(operator): …"
+git push
+
+git add apps/admin
+git commit -m "feat(admin): …"
+git push
 ```
 
-Проверки:
+Несколько apps — лучше отдельные коммиты, не один мешок. Не коммитить `.env` и секреты; `.env.example` — ок.
 
-- BFF: http://localhost:3000/health
-- core-api: http://localhost:3001/health
-- Kafka UI: http://localhost:8088
-
-Только API (без generator/consumers), удобно для Admin auth:
-
-```bash
-cd apps/backend && npm run infra:up && npm run dev:api
-# или из корня: npm run dev:api
-```
-
-### 2. Operator (Angular)
-
-```bash
-cd apps/operator
-npm install
-npm start
-# или из корня: npm run dev:operator
-```
-
-→ http://localhost:4200/
-
-### 3. Admin (React)
-
-```bash
-cd apps/admin
-npm install
-npm run dev
-# или из корня: npm run dev:admin
-```
-
-→ http://localhost:5173/ (dev-proxy `/api` → `:3000`)
-
-## Demo-учётки (из seed)
-
-Пароль для обоих: `password123`
-
-| Роль | Email |
-|------|--------|
-| Operator | `operator@telemetry.local` |
-| Admin | `admin@telemetry.local` |
-
-Demo site id: `11111111-1111-1111-1111-111111111111`
-
-Seed-датчики: T-101, P-201, V-301, F-401. **T-101** периодически выходит за warning (иногда critical) дольше debounce (~20 с), чтобы журнал алертов и overview не были вечно «Норма». Остальные seed-датчики обычно в норме. После `npm run start:generator:dev` (или `dev`) первая экскурсия начинается сразу.
-
-Повторный `npm run prisma:seed` **удаляет** demo users/sensors/alerts и заливает seed заново. Пороги T-101 менять не обязательно — достаточно перезапустить generator.
-
-## Smoke-проверка
-
-1. `npm run dev:backend` (или `cd apps/backend && npm run dev`).
-2. Login в Operator: `operator@telemetry.local` / `password123`.
-3. Overview: KPI и текущие значения датчиков. T-101 в первые ~45 с после старта generator — warning (иногда critical), не только «Норма».
-4. Charts: живой график по датчику.
-5. Alerts journal: подождать **~30–60 с** экскурсию T-101 → событие `open` → ack → после возврата в норму и hysteresis (~20 с) статус `resolved`.
-6. Admin (`admin@telemetry.local`): объекты/линии CRUD; Home KPI; журнал `/alerts`; датчики `isActive`; создание датчика на новой линии.
-7. Operator: выбрать новый объект в header → overview показывает его датчики (после ~10 с catalog refresh generator). F5 сохраняет выбор. Operator POST `/api/sites` → 403.
-
-
-## Документация по apps
-
-| App | Точка входа |
-|-----|-------------|
-| Backend | [apps/backend/README.md](./apps/backend/README.md), [AGENTS.md](./apps/backend/AGENTS.md), [docs/](./apps/backend/docs/) |
-| Operator | [apps/operator/README.md](./apps/operator/README.md), [AGENTS.md](./apps/operator/AGENTS.md) |
-| Admin | [apps/admin/README.md](./apps/admin/README.md), [AGENTS.md](./apps/admin/AGENTS.md) |
-
-Docker Compose остаётся в `apps/backend/docker-compose.yml` — поднимается через `npm run infra:up` из backend (или корневой алиас).
+Docker Compose: `apps/backend/docker-compose.yml` → `npm run infra:up` из backend или корневой алиас.
