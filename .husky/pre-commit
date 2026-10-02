@@ -1,3 +1,4 @@
 npx lint-staged --cwd apps/backend
 npx lint-staged --cwd apps/operator
 npx lint-staged --cwd apps/admin
+npx lint-staged --cwd apps/viewer

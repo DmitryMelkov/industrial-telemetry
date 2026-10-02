@@ -9,7 +9,9 @@ async function bootstrap() {
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: (process.env.CORS_ORIGIN ?? 'http://localhost:4200,http://localhost:5173').split(','),
+    origin: (
+      process.env.CORS_ORIGIN ?? 'http://localhost:4200,http://localhost:5173,http://localhost:5174'
+    ).split(','),
     credentials: true,
   });
   const port = Number(process.env.BFF_PORT ?? 3000);

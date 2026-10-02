@@ -2,7 +2,7 @@
 
 Демо-стенд промышленной телеметрии: эмуляция датчиков → Kafka → хранилища → BFF → realtime-дашборды.
 
-Один репозиторий: **backend** (NestJS) + **Operator** (Angular) + **Admin** (React). Браузер ходит **только в BFF** `http://localhost:3000` (REST + WebSocket).
+Один репозиторий: **backend** (NestJS) + **Operator** (Angular) + **Admin** (React) + **Viewer** (Vue). Браузер ходит **только в BFF** `http://localhost:3000` (REST + WebSocket).
 
 ## Структура
 
@@ -11,7 +11,8 @@ industrial-telemetry/
 ├── apps/
 │   ├── backend/    # NestJS, Docker Compose, Prisma, generator/consumers
 │   ├── operator/   # Angular — мониторинг оператора (:4200)
-│   └── admin/      # React — конфигурация и пользователи (:5173)
+│   ├── admin/      # React — конфигурация и пользователи (:5173)
+│   └── viewer/     # Vue — read-only мониторинг (:5174)
 ├── package.json    # скрипты с корня + husky/lint-staged
 ├── .husky/         # один pre-commit на mono
 └── README.md
@@ -22,6 +23,7 @@ industrial-telemetry/
 | Backend | [apps/backend/README.md](./apps/backend/README.md), [docs/](./apps/backend/docs/) |
 | Operator | [apps/operator/README.md](./apps/operator/README.md) |
 | Admin | [apps/admin/README.md](./apps/admin/README.md) |
+| Viewer | [apps/viewer/README.md](./apps/viewer/README.md) |
 
 ## Требования
 
@@ -95,6 +97,23 @@ npm run dev
 
 → http://localhost:5173/ (dev-proxy `/api` → `:3000`)
 
+### 4. Viewer
+
+```bash
+cd apps/viewer
+npm install
+npm run dev
+# из корня: npm run dev:viewer
+```
+
+→ http://localhost:5174/ (dev-proxy `/api` и `/ws` → `:3000`)
+
+В `apps/backend/.env` добавь origin Viewer:
+
+```env
+CORS_ORIGIN=http://localhost:4200,http://localhost:5173,http://localhost:5174
+```
+
 ## Demo-учётки (seed)
 
 Пароль для обоих: **`password123`**
@@ -159,6 +178,9 @@ git push
 
 git add apps/admin
 git commit -m "feat(admin): …"
+
+git add apps/viewer
+git commit -m "feat(viewer): …"
 git push
 ```
 
